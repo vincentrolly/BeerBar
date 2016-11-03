@@ -9,13 +9,15 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 /**
  * Created by vro on 08/10/16.
  */
 @Controller
 @RequestMapping("/bars")
-public class BarCtrl
-{
+public class BarCtrl {
+
     // ------------------------
     // PRIVATE FIELDS
     // ------------------------
@@ -25,135 +27,115 @@ public class BarCtrl
     @Autowired
     private BeerService beerService;
 
+
+    @CrossOrigin(origins = "http://localhost:8080")
     @RequestMapping(
             value = "",
             method = RequestMethod.GET)
-    public ResponseEntity<Iterable<Bar>> all(HttpEntity<byte[]> requestEntity)
-    {
-        String requestHeader = requestEntity.getHeaders().getFirst("MyRequestHeader");
-        byte[] requestBody = requestEntity.getBody();
-        HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.set("Access-Control-Allow-Origin", "*");
-        return new ResponseEntity<>(barService.all(), responseHeaders, HttpStatus.CREATED);
+    public ResponseEntity<Iterable<Bar>> GetAll() {
+        ResponseEntity<Iterable<Bar>> titi = new ResponseEntity<>(barService.all(), HttpStatus.CREATED);
+        return titi;
     }
 
     @RequestMapping(
-            value = "/{nameBar}",
-            method = RequestMethod.GET)
-    public ResponseEntity<Bar> one(@PathVariable("nameBar") String nameBar)
-    {
-        Bar bar = barService.getByName(nameBar);
-        if(bar != null)
-        {
-            return new ResponseEntity<>(bar, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
-    @RequestMapping(
-            value = "/create",
+            value = "",
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<Bar> create(@RequestBody Bar bar)
-    {
-        if(barService.create(bar))
-        {
-            return new ResponseEntity<>(bar, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
+    public ResponseEntity<Bar> Create(@RequestBody String NameBar) {
+
+        ResponseEntity<Bar> NewBar = new ResponseEntity<>(barService.create(NameBar), HttpStatus.CREATED);
+        return NewBar;
     }
 
     @RequestMapping(
-            value = "/update/{nameBar}",
+            value = "",
             method = RequestMethod.PUT,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<Bar> update(@RequestBody Bar bar, @PathVariable("nameBar") String nameBar)
+    public ResponseEntity<Bar> updateBar(@RequestBody Bar bar)
     {
-        Bar barToUpdate = barService.getByName(nameBar);
-        bar.setBarId(barToUpdate.getBarId());
-        if(barService.update(bar))
+        if(barService.getByName(bar.getName()) != null)
         {
+            barService.Update(bar);
             return new ResponseEntity<>(bar, HttpStatus.OK);
         }
-        return new ResponseEntity<>(HttpStatus.NOT_ACCEPTABLE);
-    }
-
-    @RequestMapping(
-            value = "/delete/{nameBar}",
-            method = RequestMethod.DELETE
-    )
-    @ResponseBody
-    public ResponseEntity<String> delete(@PathVariable("nameBar") String nameBar)
-    {
-//        beerService.deleteAllBeer();
-        if(barService.delete(nameBar))
-        {
-            return new ResponseEntity<>("Bar Found !!! Deleted !!!", HttpStatus.OK);
-        }
         else
-        {
-            return new ResponseEntity<>("Bar Not Found !!! Not deleted !!!", HttpStatus.NOT_FOUND);
-        }
+            return new ResponseEntity<>(bar, HttpStatus.NOT_FOUND);
     }
 
     @RequestMapping(
-            value = "/{nameBar}/add/{nameBeer}",
-            method = RequestMethod.POST)
-    public ResponseEntity<String> add(@PathVariable("nameBar") String nameBar,
-                                      @PathVariable("nameBeer") String nameBeer)
+            value = "",
+            method = RequestMethod.DELETE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<Bar> deleteBar(@RequestBody Bar bar)
     {
-        boolean beerFound = false;
-        for(Bar bar : barService.getAll())
-        {
-            if(bar.getName().equals(nameBar))
-            {
-                for(Beer beer : bar.getListBeer())
-                {
-                    if(beer.getName().equals(nameBeer))
-                        beerFound = true;
-                }
-                if(beerFound == false) {
-                    bar.getListBeer().add(beerService.getByName(nameBeer));
-                    barService.update(bar);
-                    return new ResponseEntity<>("Bar Found !!! Add Beer OK !!!", HttpStatus.OK);
-                }
-                else
-                {
-                    return new ResponseEntity<>("Bar Found !!! Add Beer Unnecessary !!!", HttpStatus.OK);
-                }
-            }
-        }
-        return new ResponseEntity<>("Bar Not Found !!! Not add Beer !!!", HttpStatus.NOT_FOUND);
+        if (barService.delete(bar.getName()))
+            return new ResponseEntity<>(bar, HttpStatus.OK);
+        else
+            return new ResponseEntity<>(bar, HttpStatus.NOT_FOUND);
     }
 
     @RequestMapping(
-            value="/{nameBar}/remove/{nameBeer}",
-            method = RequestMethod.POST)
-    public ResponseEntity<String> remove(@PathVariable("nameBar") String nameBar,
-                                         @PathVariable("nameBeer") String nameBeer)
+            value = "/{barname}/beers",
+            method = RequestMethod.DELETE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<Beer> deleteBeer(@RequestBody Beer beer)
     {
-        for(Bar bar : barService.getAll())
+        List<Bar> listBars = beerService.getBarsWithThisBeer(beer.getName());
+
+        for(Bar bar : listBars)
         {
-            if(bar.getName().equals(nameBar))
-            {
-                for(Beer beer : bar.getListBeer())
-                {
-                    if(beer.getName().equals(nameBeer))
-                    {
-                        bar.getListBeer().remove(beerService.getByName(nameBeer));
-                        barService.update(bar);
-                        return new ResponseEntity<>("Bar Found !!! Remove Beer OK !!!", HttpStatus.OK);
-                    }
-                }
-                return new ResponseEntity<>("Bar Found !!! Not Remove Beer !!!", HttpStatus.NOT_FOUND);
-            }
-            else
-            {
-                return new ResponseEntity<>("Bar Not Found !!! Not remove Beer !!!", HttpStatus.NOT_FOUND);
-            }
+            barService.deleteBeerInBar(beer, bar);
         }
-        return new ResponseEntity<>("Failed !!!", HttpStatus.NOT_ACCEPTABLE);
+        if(beerService.delete(beer))
+            return new ResponseEntity<>(beer, HttpStatus.OK);
+        else
+            return new ResponseEntity<>(beer, HttpStatus.NOT_FOUND);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//        @RequestMapping(
+//            value = "/{nameBar}/add/{nameBeer}",
+//            method = RequestMethod.POST)
+//    public ResponseEntity<String> add(@PathVariable("nameBar") String nameBar,
+//                                      @PathVariable("nameBeer") String nameBeer)
+//    {
+//        boolean beerFound = false;
+//        for(Bar bar : barService.getAll())
+//        {
+//            if(bar.getName().equals(nameBar))
+//            {
+//                for(Beer beer : bar.getListBeer())
+//                {
+//                    if(beer.getName().equals(nameBeer))
+//                        beerFound = true;
+//                }
+//                if(beerFound == false) {
+//                    bar.getListBeer().add(beerService.getByName(nameBeer));
+//                    barService.Update(bar);
+//                    return new ResponseEntity<>("Bar Found !!! Add Beer OK !!!", HttpStatus.OK);
+//                }
+//                else
+//                {
+//                    return new ResponseEntity<>("Bar Found !!! Add Beer Unnecessary !!!", HttpStatus.OK);
+//                }
+//            }
+//        }
+//        return new ResponseEntity<>("Bar Not Found !!! Not add Beer !!!", HttpStatus.NOT_FOUND);
+//    }
 }

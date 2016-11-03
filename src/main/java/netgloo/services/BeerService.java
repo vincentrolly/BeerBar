@@ -45,12 +45,13 @@ public class BeerService {
         return beer;
     }
 
-    public void deleteAllBeer()
+    public String deleteAllBeer()
     {
 //        for(Beer allBeer : IBeerDao.findAll())
 //        {
 //        }
         IBeerDao.delete(IBeerDao.findAll());
+        return "Delete All Beers ok";
     }
 
     public Beer getByName(String nameBeer)
@@ -62,6 +63,20 @@ public class BeerService {
                 beer = allBeer;
             else
                 beer = null;
+        }
+        return beer;
+    }
+
+    public Beer Update(Beer beer)
+    {
+        for(Beer beerToUpdate : IBeerDao.findAll())
+        {
+            if(beerToUpdate.getName().equals(beer.getName()))
+            {
+//                beerToUpdate.setName(beer.getName());
+                beerToUpdate.setDegree(beer.getDegree());
+                IBeerDao.save(beerToUpdate);
+            }
         }
         return beer;
     }
@@ -97,19 +112,11 @@ public class BeerService {
         return false;
     }
 
-    public boolean update(Beer beer)
-    {
-        if(beer.getBeerId() > 0)
-        {
-            IBeerDao.save(beer);
-            return true;
-        }
-        return false;
-    }
 
-//    public boolean delete(Beer beer)
-//    {
-//        boolean ret = false;
+
+    public boolean delete(Beer beer)
+    {
+        boolean ret = false;
 //        for(Bar bars : IBarDao.findAll())
 //        {
 //            for(Beer beers : IBeerDao.findAll())
@@ -123,42 +130,42 @@ public class BeerService {
 //                }
 //            }
 //        }
-//        return ret;
-//    }
+        return ret;
+    }
 
     public boolean delete(String beerToDelete)
     {
         boolean ret = false;
-        for(Bar bars : IBarDao.findAll())
-        {
-            for(Beer beers : IBeerDao.findAll())
-            {
-                if(beers.getName().equals(beerToDelete))
-                {
-                    bars.getListBeer().remove(beers);
-                    IBarDao.save(bars);
-                    IBeerDao.delete(beers);
-                    ret = true;
-                }
-            }
-        }
+//        for(Bar bars : IBarDao.findAll())
+//        {
+//            for(Beer beers : IBeerDao.findAll())
+//            {
+//                if(beers.getName().equals(beerToDelete))
+//                {
+//                    bars.getListBeer().remove(beers);
+//                    IBarDao.save(bars);
+//                    IBeerDao.delete(beers);
+//                    ret = true;
+//                }
+//            }
+//        }
         return ret;
     }
 
     public List<Bar> getBarsWithThisBeer(String nameBeer)
     {
         List<Bar> listBar = new ArrayList<>();
-
-        for(Bar bars : IBarDao.findAll())
-        {
-            for(Beer beers : bars.getListBeer())
-            {
-                if(beers.getName().equals(nameBeer))
-                {
-                    listBar.add(bars);
-                }
-            }
-        }
+//
+//        for(Bar bars : IBarDao.findAll())
+//        {
+//            for(Beer beers : bars.getListBeer())
+//            {
+//                if(beers.getName().equals(nameBeer))
+//                {
+//                    listBar.add(bars);
+//                }
+//            }
+//        }
 
         return listBar;
     }

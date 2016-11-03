@@ -30,8 +30,8 @@ public class Beer
     public Beer(){}
     public Beer(String Name, long Degree)
     {
-        this.name = Name;
-        this.degree = Degree;
+        name = Name;
+        degree = Degree;
     }
 
     public long getBeerId() {
