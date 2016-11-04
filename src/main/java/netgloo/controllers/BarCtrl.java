@@ -9,6 +9,9 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -32,9 +35,12 @@ public class BarCtrl {
     @RequestMapping(
             value = "",
             method = RequestMethod.GET)
-    public ResponseEntity<Iterable<Bar>> GetAll() {
-        ResponseEntity<Iterable<Bar>> titi = new ResponseEntity<>(barService.all(), HttpStatus.CREATED);
-        return titi;
+    public ResponseEntity<Iterable<Bar>> GetAll(HttpServletRequest request,
+                                                HttpServletResponse response) {
+        Cookie cookie = setCookie("token", "lolololo", 1);
+        response.addCookie(cookie);   // response: reference to HttpServletResponse
+
+        return new ResponseEntity<>(barService.all(), HttpStatus.CREATED);
     }
 
     @RequestMapping(
@@ -138,4 +144,13 @@ public class BarCtrl {
 //        }
 //        return new ResponseEntity<>("Bar Not Found !!! Not add Beer !!!", HttpStatus.NOT_FOUND);
 //    }
+
+    private static Cookie setCookie(String key, String value, int maxHours)
+    {
+        Cookie cookie = new Cookie(key, value);
+        cookie.setMaxAge(maxHours * 60 * 60);  // (s)
+        cookie.setPath("/");
+
+        return cookie;
+    }
 }
