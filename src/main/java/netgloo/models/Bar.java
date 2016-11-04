@@ -7,7 +7,8 @@ import java.util.Set;
 
 @Entity
 @Table(name = "Bar")
-public class Bar {
+public class Bar
+{
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long barId;
@@ -44,7 +45,7 @@ public class Bar {
     // PUBLIC METHODS
     // ------------------------
 
-    public Bar() {}
+    public Bar() { }
 
 
     public Bar(String Name,
@@ -53,7 +54,7 @@ public class Bar {
                String PostalCode,
                double Latitude,
                double Longitude,
-               String Description) {
+               String Description ) {
         name = Name;
         address = Address;
         city = City;
@@ -64,7 +65,7 @@ public class Bar {
     }
 
     public long getBarId() {
-        return this.barId;
+        return barId;
     }
 
     public void setBarId(long barId) {
@@ -72,7 +73,7 @@ public class Bar {
     }
 
     public String getName() {
-        return this.name;
+        return name;
     }
 
     public void setName(String name) {
@@ -80,7 +81,7 @@ public class Bar {
     }
 
     public String getAddress() {
-        return this.address;
+        return address;
     }
 
     public void setAddress(String address) {
@@ -88,7 +89,7 @@ public class Bar {
     }
 
     public String getCity() {
-        return this.city;
+        return city;
     }
 
     public void setCity(String city) {
@@ -96,7 +97,7 @@ public class Bar {
     }
 
     public String getPostalCode() {
-        return this.postalCode;
+        return postalCode;
     }
 
     public void setPostalCode(String postalCode) {
@@ -104,7 +105,7 @@ public class Bar {
     }
 
     public double getLatitude() {
-        return this.latitude;
+        return latitude;
     }
 
     public void setLatitude(double latitude) {
@@ -112,7 +113,7 @@ public class Bar {
     }
 
     public double getLongitude() {
-        return this.longitude;
+        return longitude;
     }
 
     public void setLongitude(double longitude) {
@@ -120,18 +121,44 @@ public class Bar {
     }
 
     public String getDescription() {
-        return this.description;
+        return description;
     }
 
     public void setDescription(String description) {
         this.description = description;
     }
 
-    public Set<Beer> getListBeer() {
-        return this.listBeer;
+    public Set<Beer> getListBeer()
+    {
+      return this.listBeer;
     }
 
-    public void setListBeer(Set<Beer> listBeer) {
+    public void setListBeer(Set<Beer> listBeer)
+    {
         this.listBeer = listBeer;
     }
+
+//    public void addBeer(Beer b, int qte, int price)
+//    {
+//        BeerBar association = new BeerBar();
+//        association.setBeer(b);
+//        // TODO check if needed
+//        //association.setBar(this);
+//        association.setPrice(price);
+//        association.setQuantity(qte);
+//
+//
+//
+//        this.beers.add(association);
+//        // Also add the association object to the employee.
+//        b.getBars().add(association);
+//    }
+
+//    public Set<Beer> getListBeer() {
+//        return this.listBeer;
+//    }
+//
+//    public void setListBeer(Set<Beer> listBeer) {
+//        this.listBeer = listBeer;
+//    }
 }
