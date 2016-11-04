@@ -20,7 +20,8 @@ import java.util.Map;
  */
 public class HttpURLConnectionExample {
 
-    private final String USER_AGENT = "Mozilla/5.0";
+    private static final String USER_AGENT = "Mozilla/5.0";
+    private static final String ORIGIN = "http://www.google.fr";
 
     public static void main(String[] args) throws Exception {
 
@@ -103,7 +104,7 @@ public class HttpURLConnectionExample {
      * @return parsed response into JSONObject
      * @throws Exception
      */
-    public JSONObject SendGetJson(String url, String parameters) throws Exception {
+    public static JSONObject SendGetJson(String url, String parameters) throws Exception {
         String response = SendGet(url, parameters);
         return new JSONObject(response);
     }
@@ -115,7 +116,7 @@ public class HttpURLConnectionExample {
      * @return
      * @throws Exception
      */
-    public String SendGet(String url, String parameters) throws Exception {
+    public static String SendGet(String url, String parameters) throws Exception {
         parameters = parameters != null && !parameters.isEmpty()
                 ? parameters
                 : "";
@@ -130,6 +131,7 @@ public class HttpURLConnectionExample {
 
         //add request header
         con.setRequestProperty("User-Agent", USER_AGENT);
+        con.setRequestProperty("Origin", ORIGIN);
 
         int responseCode = con.getResponseCode();
         System.out.println("\nSending 'GET' request to URL : " + url);
