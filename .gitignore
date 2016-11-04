@@ -54,3 +54,7 @@ overridedb.*
 dump.rdb
 transaction-logs
 *.zip
+
+.idea/libraries/
+.idea/uiDesigner.xml
+.idea/workspace.xml
