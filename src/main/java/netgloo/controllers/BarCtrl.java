@@ -28,12 +28,13 @@ public class BarCtrl {
     private BeerService beerService;
 
 
-    @CrossOrigin(origins = "http://localhost:8080")
+    //    @CrossOrigin(origins = "http://localhost:8080")
     @RequestMapping(
             value = "",
             method = RequestMethod.GET)
     public ResponseEntity<Iterable<Bar>> GetAll() {
-        ResponseEntity<Iterable<Bar>> titi = new ResponseEntity<>(barService.all(), HttpStatus.CREATED);
+        HttpHeaders corsHeader = setCors();
+        ResponseEntity<Iterable<Bar>> titi = new ResponseEntity<>(barService.all(), corsHeader, HttpStatus.OK);
         return titi;
     }
 
@@ -50,18 +51,26 @@ public class BarCtrl {
 
     @RequestMapping(
             value = "",
+            method = RequestMethod.OPTIONS)
+    @ResponseBody
+    public ResponseEntity ReplyOptions() {
+
+        HttpHeaders corsHeader = setCors();
+        return new ResponseEntity(null, corsHeader, HttpStatus.OK);
+    }
+
+    @RequestMapping(
+            value = "",
             method = RequestMethod.PUT,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<Bar> updateBar(@RequestBody Bar bar)
-    {
-        if(barService.getByName(bar.getName()) != null)
-        {
+    public ResponseEntity<Bar> updateBar(@RequestBody Bar bar) {
+        HttpHeaders corsHeader = setCors();
+        if (barService.getByName(bar.getName()) != null) {
             barService.Update(bar);
-            return new ResponseEntity<>(bar, HttpStatus.OK);
-        }
-        else
-            return new ResponseEntity<>(bar, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(bar, corsHeader, HttpStatus.OK);
+        } else
+            return new ResponseEntity<>(bar, corsHeader, HttpStatus.NOT_FOUND);
     }
 
     @RequestMapping(
@@ -69,12 +78,12 @@ public class BarCtrl {
             method = RequestMethod.DELETE,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<Bar> deleteBar(@RequestBody Bar bar)
-    {
+    public ResponseEntity<Bar> deleteBar(@RequestBody Bar bar) {
+        HttpHeaders corsHeader = setCors();
         if (barService.delete(bar.getName()))
-            return new ResponseEntity<>(bar, HttpStatus.OK);
+            return new ResponseEntity<>(bar, corsHeader, HttpStatus.OK);
         else
-            return new ResponseEntity<>(bar, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(bar, corsHeader, HttpStatus.NOT_FOUND);
     }
 
     @RequestMapping(
@@ -82,27 +91,24 @@ public class BarCtrl {
             method = RequestMethod.DELETE,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<Beer> deleteBeer(@RequestBody Beer beer)
-    {
+    public ResponseEntity<Beer> deleteBeer(@RequestBody Beer beer) {
         List<Bar> listBars = beerService.getBarsWithThisBeer(beer.getName());
-
-        for(Bar bar : listBars)
-        {
+        HttpHeaders corsHeader = setCors();
+        for (Bar bar : listBars) {
             barService.deleteBeerInBar(beer, bar);
         }
-        if(beerService.delete(beer))
-            return new ResponseEntity<>(beer, HttpStatus.OK);
+        if (beerService.delete(beer))
+            return new ResponseEntity<>(beer, corsHeader, HttpStatus.OK);
         else
-            return new ResponseEntity<>(beer, HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(beer, corsHeader, HttpStatus.NOT_FOUND);
     }
 
-
-
-
-
-
-
-
+    private static HttpHeaders setCors()
+    {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.set("Access-Control-Allow-Origin","*");
+        return responseHeaders;
+    }
 
 
 

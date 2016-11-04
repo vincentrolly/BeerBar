@@ -34,15 +34,16 @@ public class BarService {
 
     public Iterable<Bar> all()
     {
-        Iterable<Bar> jcsudsdc = IBarDao.findAll();
-        return jcsudsdc;
+        Iterable<Bar> listBars = IBarDao.findAll();
+
+        return listBars;
     }
 
     public Bar Update(Bar bar)
     {
         for(Bar barToUpdate : IBarDao.findAll())
         {
-            if(barToUpdate.getName().equals(bar.getName())) {
+            if(barToUpdate.getBarId() == bar.getBarId()) {
 
                 barToUpdate.setAddress(bar.getAddress());
                 barToUpdate.setCity(bar.getCity());
