@@ -39,35 +39,28 @@ public class BarService {
         return listBars;
     }
 
+    public Bar getById(long id)
+    {
+        return IBarDao.findOne(id);
+    }
+
     public Bar Update(Bar bar)
     {
-        for(Bar barToUpdate : IBarDao.findAll())
-        {
-            if(barToUpdate.getBarId() == bar.getBarId()) {
-
-                barToUpdate.setAddress(bar.getAddress());
-                barToUpdate.setCity(bar.getCity());
-                barToUpdate.setDescription(bar.getDescription());
-                barToUpdate.setLatitude(bar.getLatitude());
-                barToUpdate.setLongitude(bar.getLongitude());
-                barToUpdate.setName(bar.getName());
-                barToUpdate.setPostalCode(bar.getPostalCode());
-                bar = IBarDao.save(barToUpdate);
-            }
-        }
-        return bar;
+        if(!Exist(bar.getBarId()))
+            return null;
+        return IBarDao.save(bar);
     }
 
-    public List<Bar> getAllByName(String name)
-    {
-        List<Bar> bars = new ArrayList<>();
-        for(Bar b : IBarDao.findAll())
-        {
-            if(b.getName().equals(name))
-                bars.add(b);
-        }
-        return bars;
-    }
+//    public List<Bar> getAllByName(String name)
+//    {
+//        List<Bar> bars = new ArrayList<>();
+//        for(Bar b : IBarDao.findAll())
+//        {
+//            if(b.getName().equals(name))
+//                bars.add(b);
+//        }
+//        return bars;
+//    }
 
     public List<Bar> getAll()
     {
@@ -84,16 +77,18 @@ public class BarService {
         Bar bar = new Bar();
         for(Bar b : IBarDao.findAll())
         {
-            if(b.getName().equals(name))
+            if(b.getName().equals(name)) {
                 bar = b;
+                break;
+            }
         }
         return bar;
     }
 
-    public Bar get(long id)
-    {
-        return IBarDao.findOne(id);
-    }
+//    public Bar get(long id)
+//    {
+//        return IBarDao.findOne(id);
+//    }
 
     public boolean delete(Bar bar)
     {
@@ -104,37 +99,41 @@ public class BarService {
         return ret;
     }
 
-    public Bar create(String namebar)
+    public Bar create(final String namebar)
     {
         Bar bar;
-        if(isExist(namebar))
+        if(nameExist(namebar))
         {
-            bar = getByName(namebar);
+            return null;
         }
-        else
-        {
-            bar = new Bar();
-            bar.setName(namebar);
-            bar.setAddress("t4t1g4t1g");
-            bar.setCity("Lyon");
-            bar.setDescription("titi toto tata");
-            bar.setLatitude(4.7);
-            bar.setListBeer(null);
-            bar.setLongitude(5.8);
-            bar.setPostalCode("13579");
-            IBarDao.save(bar);
-        }
-        return bar;
+
+        //  TODO : call to api places google
+
+        bar = new Bar();
+        bar.setName(namebar);
+
+
+        bar.setAddress("t4t1g4t1g");
+        bar.setCity("Lyon");
+        bar.setDescription("titi toto tata");
+        bar.setLatitude(4.7);
+        bar.setListBeer(null);
+        bar.setLongitude(5.8);
+        bar.setPostalCode("13579");
+
+
+        return IBarDao.save(bar);
     }
 
-    public boolean isExist(String nameBar)
+    public boolean Exist(long id)
     {
-        boolean ret = false;
-        if(getByName(nameBar) != null)
-            ret = true;
-        return ret;
+        return getById(id) != null;
     }
 
+    public boolean nameExist(String name)
+    {
+        return getByName(name) != null;
+    }
 
     public boolean delete(long id)
     {

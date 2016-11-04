@@ -40,17 +40,6 @@ public class BarCtrl {
 
     @RequestMapping(
             value = "",
-            method = RequestMethod.POST,
-            consumes = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public ResponseEntity<Bar> Create(@RequestBody String NameBar) {
-
-        ResponseEntity<Bar> NewBar = new ResponseEntity<>(barService.create(NameBar), HttpStatus.CREATED);
-        return NewBar;
-    }
-
-    @RequestMapping(
-            value = "",
             method = RequestMethod.OPTIONS)
     @ResponseBody
     public ResponseEntity ReplyOptions() {
@@ -65,12 +54,25 @@ public class BarCtrl {
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<Bar> updateBar(@RequestBody Bar bar) {
-        HttpHeaders corsHeader = setCors();
-        if (barService.getByName(bar.getName()) != null) {
-            barService.Update(bar);
-            return new ResponseEntity<>(bar, corsHeader, HttpStatus.OK);
-        } else
-            return new ResponseEntity<>(bar, corsHeader, HttpStatus.NOT_FOUND);
+        final HttpHeaders corsHeader = setCors();
+
+        Bar barUpdate = barService.Update(bar);
+        HttpStatus status = HttpStatus.OK;
+        if (barUpdate == null)
+            status = HttpStatus.NOT_FOUND;
+
+        return new ResponseEntity<>(barUpdate, corsHeader, status);
+    }
+
+    @RequestMapping(
+            value = "",
+            method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<Bar> Create(@RequestBody String NameBar) {
+
+        ResponseEntity<Bar> NewBar = new ResponseEntity<>(barService.create(NameBar), HttpStatus.CREATED);
+        return NewBar;
     }
 
     @RequestMapping(
