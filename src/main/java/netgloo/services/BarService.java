@@ -200,6 +200,7 @@ public class BarService {
 
         //  TODO : call to api places google
 
+
         Bar bar = new Bar();
         bar.setName(nameBar);
 

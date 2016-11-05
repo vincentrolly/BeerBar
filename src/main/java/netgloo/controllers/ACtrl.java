@@ -6,6 +6,7 @@ import org.springframework.http.HttpHeaders;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,7 +18,9 @@ public class ACtrl
     protected HttpHeaders setCors()
     {
         HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.set("Access-Control-Allow-Origin","*");
+//        responseHeaders.set("Access-Control-Allow-Origin","*");
+        responseHeaders.put("Access-Control-Allow-Origin", Arrays.asList("http://localhost:3000"));
+        responseHeaders.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
         return responseHeaders;
     }
 

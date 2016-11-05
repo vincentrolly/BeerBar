@@ -55,8 +55,6 @@ public class HttpURLConnectionExample {
      */
     public static String prepareRequestParams(HashMap<String, String> params, String charset)
     {
-        // TODO use Map<String, String>
-
         if(params == null || params.size() == 0)
             return null;
 

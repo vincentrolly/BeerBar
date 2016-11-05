@@ -35,27 +35,11 @@ public class LoginCtrl extends ACtrl
     @Autowired
     private LoginService LoginService;
 
-/*
-    @RequestMapping(
-            value = "",
-            method = RequestMethod.OPTIONS)
-    @ResponseBody
-    public ResponseEntity<Boolean> Create(HttpServletRequest request,
-                                          HttpServletResponse response)
-    {
-        response.setHeader("Access-Control-Allow-Origin", "*");
-
-        ResponseEntity<Boolean> NewBar = new ResponseEntity<>(true, HttpStatus.OK);
-        return NewBar;
-    }
-*/
-
     @RequestMapping(
             value = "",
             method = RequestMethod.OPTIONS)
     @ResponseBody
     public ResponseEntity ReplyOptions() {
-
         HttpHeaders corsHeader = setCors();
         return new ResponseEntity(null, corsHeader, HttpStatus.OK);
     }
@@ -66,12 +50,12 @@ public class LoginCtrl extends ACtrl
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<User> Create(@RequestBody LoginRequestParams params, @RequestHeader HttpHeaders headersReq)
+    public ResponseEntity<User> Create(@RequestBody LoginRequestParams params)
     {
         boolean ret = false;
         HttpStatus retStatus = HttpStatus.UNAUTHORIZED;
         //JSONObject param = new JSONObject(jsonLoginParams);
-        HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = setCors();
 
 
         //String test = param.getString("username");
@@ -95,12 +79,10 @@ public class LoginCtrl extends ACtrl
             token = generateToken(params);
   
             this.storeToken(user, token);
-            // TODO remove origin if unused
             CookieHelper.addCookie(headers, token, user.getUserId());
 
 //            response.setHeader("Access-Control-Allow-Origin", "*");
-            headers.put("Access-Control-Allow-Origin", Arrays.asList("http://localhost:3000"));
-            headers.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
+
 
             retStatus = HttpStatus.OK;
         }
@@ -127,13 +109,15 @@ public class LoginCtrl extends ACtrl
     private User checkCredentials(String userLogin, String userPass) {
         //boolean ret = true;
 
-        // TODO check userLogin and pass from db
+        // on recupere le user par son login
         User user = LoginService.getByName(userLogin);
 
+        // on verifie que le user existe
         if(user == null)
             return null;
 
-        if(!LoginService.comparePassword(user, userPass))
+        // on verifie que le pass correspond
+        if(userPass.equals(user.getPassword()))
             return null;
 
 
@@ -147,27 +131,15 @@ public class LoginCtrl extends ACtrl
      * @param token
      */
     private void storeToken(User user, String token) {
-        // TODO sotre token for user in db
         user.setToken(token);
         LoginService.Update(user);
     }
 
     /**
      * Creates a token using current date, username
+     * @param param param from body request
      * @return a sha256 encoded token
      */
-    /*
-    private String createToken() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();
-        String sdate = dateFormat.format(date); //2014/08/06 15:59:48
-
-        // TODO add username and sha256 it
-
-        return sdate;
-    }
-    */
-
     private String generateToken(LoginRequestParams param)
     {
         String str = new String(DatatypeConverter.parseBase64Binary(param.getUsername() + param.getPassword() + new Date()));
@@ -175,6 +147,11 @@ public class LoginCtrl extends ACtrl
         return res;
     }
 
+    /**
+     * Encode a string to sha256
+     * @param base clear string
+     * @return encoded string
+     */
     public static String sha256(String base) {
         try{
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -194,6 +171,9 @@ public class LoginCtrl extends ACtrl
     }
 
 
+    /**
+     * Model class for login parameters
+     */
     public static class LoginRequestParams
     {
         String username;

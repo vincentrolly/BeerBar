@@ -2,8 +2,10 @@ package netgloo.controllers;
 
 import netgloo.models.Bar;
 import netgloo.models.Beer;
+import netgloo.models.User;
 import netgloo.services.BarService;
 import netgloo.services.BeerService;
+import netgloo.services.LoginService;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -40,10 +42,10 @@ public class BarCtrl extends ACtrl{
             value = "",
             method = RequestMethod.GET)
     public ResponseEntity<Iterable<Bar>> GetAll(@RequestHeader HttpHeaders reqHeaders) {
-        HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = setCors();
 
-        headers.put("Access-Control-Allow-Origin", Arrays.asList("http://localhost:3000"));
-        headers.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
+//        headers.put("Access-Control-Allow-Origin", Arrays.asList("http://localhost:3000"));
+//        headers.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
 
 
         boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
@@ -144,7 +146,17 @@ public class BarCtrl extends ACtrl{
      * @return true if the token matches
      */
     private boolean checkToken(int userId, String tokenValue) {
-        // TODO check in db
+        // on recupere le user par son id
+        User user = LoginService.getById(userId);
+
+        // on verifie que le user existe
+        if(user == null)
+            return false;
+
+        // on verifie que le token correspond
+        if(!tokenValue.equals(user.getToken()))
+            return false;
+
         return true;
     }
 
