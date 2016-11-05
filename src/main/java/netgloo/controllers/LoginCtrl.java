@@ -1,5 +1,28 @@
 package netgloo.controllers;
 
+import netgloo.helpers.CookieHelper;
+import netgloo.models.Bar;
+import netgloo.models.Beer;
+import netgloo.services.BarService;
+import netgloo.services.BeerService;
+import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import netgloo.models.IUserDao;
 import netgloo.models.User;
 import netgloo.services.LoginService;
@@ -23,17 +46,32 @@ import java.util.Date;
 import java.util.HashMap;
 
 /**
- * Created by vro on 04/11/16.
+ * Created by vro on 08/10/16.
  */
 @Controller
 @RequestMapping("/login")
 public class LoginCtrl extends ACtrl
 {
-    // ------------------------
+ // ------------------------
     // PRIVATE FIELDS
     // ------------------------
     @Autowired
     private LoginService LoginService;
+
+/*
+    @RequestMapping(
+            value = "",
+            method = RequestMethod.OPTIONS)
+    @ResponseBody
+    public ResponseEntity<Boolean> Create(HttpServletRequest request,
+                                          HttpServletResponse response)
+    {
+        response.setHeader("Access-Control-Allow-Origin", "*");
+
+        ResponseEntity<Boolean> NewBar = new ResponseEntity<>(true, HttpStatus.OK);
+        return NewBar;
+    }
+*/
 
     @RequestMapping(
             value = "",
@@ -45,42 +83,110 @@ public class LoginCtrl extends ACtrl
         return new ResponseEntity(null, corsHeader, HttpStatus.OK);
     }
 
+
     @RequestMapping(
             value = "",
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<User> Login(@RequestBody LoginRequestParams params)
+    public ResponseEntity<User> Create(@RequestBody LoginRequestParams params, @RequestHeader HttpHeaders headersReq)
     {
-        HttpHeaders corsHeader = setCors();
-        HashMap<String, String> map = new HashMap<>();
+        boolean ret = false;
+        HttpStatus retStatus = HttpStatus.UNAUTHORIZED
+        //JSONObject param = new JSONObject(jsonLoginParams);
+        HttpHeaders headers = new HttpHeaders();
+
+
+        //String test = param.getString("username");
+        //String test = params.getUsername();
+//        System.out.println(test);
+
+
+
+        // check params
+        String userLogin = params.getUsername(),
+                userPass = params.getPassword();
+        User user = this.checkCredentials(userLogin, userPass);
+        ret = user != null;
+
+
+        String token = null;
+
+        if(ret == true)
+        {
+            //token = createToken();
+            token = generateToken(params);
+  
+            this.storeToken(user, token);
+            // TODO remove origin if unused
+            String origin = headersReq.getOrigin();
+            CookieHelper.addCookie(headers, token, origin);
+
+//            response.setHeader("Access-Control-Allow-Origin", "*");
+            headers.put("Access-Control-Allow-Origin", Arrays.asList("http://localhost:3000"));
+            headers.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
+
+            retStatus = HttpStatus.OK;
+        }
+
+        user.setPassword("");
+        user.setUsername("");
+        if(token != null)
+            user.setToken(token);
+
+        ResponseEntity<User> NewBar = new ResponseEntity<>(user, headers, retStatus);
+        return NewBar;
+    }
+
+    /**
+     * Checks if a user exists in db, and checks if sumitted pass is correct
+     * @param userLogin
+     * @param userPass
+     * @return the user credentials are ok, null otherwise
+     */
+    private User checkCredentials(String userLogin, String userPass) {
+        //boolean ret = true;
+
+        // TODO check userLogin and pass from db
         User user = LoginService.getByName(params.getUsername());
 
-        if(user != null)
-        {
-            if(LoginService.comparePassword(user, params.getPassword()))
-            {
-                String token = generateToken(params);
-                map.put("token", token);
+        if(user == null)
+            return null;
 
-                LoginService.Update(user);
-                Cookie cookie = setCookie("token", token, 1);
-                HttpServletResponse response = new HttpServletResponse;
-                response.addCookie(cookie);
+        if(!LoginService.comparePassword(user, userPass))
+            return null;
 
 
-                user.setToken(token);
-                user.setPassword("");
-                user.setUsername("");
 
-                return new ResponseEntity<>(user, HttpStatus.OK);
-            }
-            else
-                return new ResponseEntity<>(user, corsHeader, HttpStatus.UNAUTHORIZED);
-        }
-        else
-            return new ResponseEntity<>(user, HttpStatus.FORBIDDEN);
+        return user;
     }
+
+    /**
+     * Adds token to the user in db
+     * @param userLogin
+     * @param token
+     */
+    private void storeToken(User user, String token) {
+        // TODO sotre token for user in db
+        user.setToken(token);
+        LoginService.Update(user);
+    }
+
+    /**
+     * Creates a token using current date, username
+     * @return a sha256 encoded token
+     */
+    /*
+    private String createToken() {
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+        String sdate = dateFormat.format(date); //2014/08/06 15:59:48
+
+        // TODO add username and sha256 it
+
+        return sdate;
+    }
+    */
 
     private String generateToken(LoginRequestParams param)
     {
@@ -106,6 +212,7 @@ public class LoginCtrl extends ACtrl
             throw new RuntimeException(ex);
         }
     }
+
 
     public static class LoginRequestParams
     {

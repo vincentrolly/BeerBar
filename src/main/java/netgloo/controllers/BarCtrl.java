@@ -4,11 +4,18 @@ import netgloo.models.Bar;
 import netgloo.models.Beer;
 import netgloo.services.BarService;
 import netgloo.services.BeerService;
+import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.net.HttpCookie;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -27,13 +34,68 @@ public class BarCtrl extends ACtrl{
     @Autowired
     private BeerService beerService;
 
+
     @RequestMapping(
             value = "",
             method = RequestMethod.GET)
-    public ResponseEntity<Iterable<Bar>> GetAll() {
-        HttpHeaders corsHeader = setCors();
-        ResponseEntity<Iterable<Bar>> titi = new ResponseEntity<>(barService.all(), corsHeader, HttpStatus.OK);
-        return titi;
+    public ResponseEntity<Iterable<Bar>> GetAll(@RequestHeader HttpHeaders reqHeaders) {
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.put("Access-Control-Allow-Origin", Arrays.asList("http://localhost:3000"));
+        headers.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
+
+
+        boolean cookieOk = this.checkCookie(reqHeaders.get("cookie"));
+        Iterable<Bar> retList;
+        HttpStatus retStatus;
+        if(cookieOk)
+        {
+            retList = barService.all();
+            retStatus = HttpStatus.CREATED;
+        }
+        else
+        {
+            retList = null;
+            retStatus = HttpStatus.UNAUTHORIZED;
+        }
+
+        return new ResponseEntity<>(retList, headers, retStatus);
+    }
+
+    private boolean checkCookie(List<String> cookies) {
+        if(cookies == null || cookies.size() == 0)
+            return false;
+
+        String cookieStr = cookies.get(0);
+        List<HttpCookie> coo = HttpCookie.parse(cookieStr);
+        int cooSize = coo == null
+            ? 0
+            : coo.size();
+
+        if(cooSize == 0)
+            return false;
+
+        for(int i = 0; i < cooSize; ++i)
+        {
+            String name = coo.get(i).getName();
+
+            if(name.equals("token") )
+            {
+                String tokenValue = coo.get(i).getValue(),
+                        // TODO get username from somewhere else
+                        username = "myusername";
+
+                return this.checkToken(username, tokenValue);
+            }
+        }
+
+        //System.out.println(cookieStr);
+        return false;
+    }
+
+    private boolean checkToken(String username, String tokenValue) {
+        // TODO check in db
+        return true;
     }
 
     @RequestMapping(
@@ -104,34 +166,4 @@ public class BarCtrl extends ACtrl{
             return new ResponseEntity<>(beer, corsHeader, HttpStatus.NOT_FOUND);
     }
 
-
-//        @RequestMapping(
-//            value = "/{nameBar}/add/{nameBeer}",
-//            method = RequestMethod.POST)
-//    public ResponseEntity<String> add(@PathVariable("nameBar") String nameBar,
-//                                      @PathVariable("nameBeer") String nameBeer)
-//    {
-//        boolean beerFound = false;
-//        for(Bar bar : barService.getAll())
-//        {
-//            if(bar.getName().equals(nameBar))
-//            {
-//                for(Beer beer : bar.getListBeer())
-//                {
-//                    if(beer.getName().equals(nameBeer))
-//                        beerFound = true;
-//                }
-//                if(beerFound == false) {
-//                    bar.getListBeer().add(beerService.getByName(nameBeer));
-//                    barService.Update(bar);
-//                    return new ResponseEntity<>("Bar Found !!! Add Beer OK !!!", HttpStatus.OK);
-//                }
-//                else
-//                {
-//                    return new ResponseEntity<>("Bar Found !!! Add Beer Unnecessary !!!", HttpStatus.OK);
-//                }
-//            }
-//        }
-//        return new ResponseEntity<>("Bar Not Found !!! Not add Beer !!!", HttpStatus.NOT_FOUND);
-//    }
 }
