@@ -1,11 +1,13 @@
 package netgloo.controllers;
 
+import netgloo.helpers.CookieHelper;
 import netgloo.models.Bar;
 import netgloo.models.Beer;
 import netgloo.services.BarService;
 import netgloo.services.BeerService;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +19,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -57,15 +61,15 @@ public class LoginCtrl
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<String> Create(HttpServletRequest request,
-                                          HttpServletResponse response,
-                                          @RequestBody String jsonLoginParams)
+    public ResponseEntity<String> Create(@RequestBody String jsonLoginParams, @RequestHeader HttpHeaders headersReq)
     {
         boolean ret = true;
         JSONObject param = new JSONObject(jsonLoginParams);
+        HttpHeaders headers = new HttpHeaders();
+
 
         String test = param.getString("username");
-        System.out.println(test);
+//        System.out.println(test);
 
 
 
@@ -83,15 +87,18 @@ public class LoginCtrl
             token = createToken();
 
             this.storeToken(userLogin, token);
-            this.addCookie(response, token);
+            String origin = headersReq.getOrigin();
+            CookieHelper.addCookie(headers, token, origin);
 
-            response.setHeader("Access-Control-Allow-Origin", "*");
+//            response.setHeader("Access-Control-Allow-Origin", "*");
+            headers.put("Access-Control-Allow-Origin", Arrays.asList("http://localhost:3000"));
+            headers.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
         }
 
         if(token != null)
             param.putOnce("token", token);
 
-        ResponseEntity<String> NewBar = new ResponseEntity<>(param.toString(), HttpStatus.OK);
+        ResponseEntity<String> NewBar = new ResponseEntity<>(param.toString(), headers, HttpStatus.OK);
         return NewBar;
     }
 
@@ -132,42 +139,53 @@ public class LoginCtrl
         return sdate;
     }
 
-    /**
-     * Checks if the request contains the token cookie
-     * @param request
-     * @return true if the token is ok
-     */
-    private boolean checkCookie(HttpServletRequest request) {
-        boolean ret = true;
-
-        return ret;
-    }
 
 
-    /**
-     * Creates a cookie
-     * @param key the cookie's name
-     * @param value the cookie's value
-     * @param maxHours the cookie's duration in hour
-     * @return the crookie created
-     */
-    private static Cookie setCookie(String key, String value, int maxHours)
-    {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(maxHours * 60 * 60);  // (s)
-        cookie.setPath("/");
 
-        return cookie;
-    }
+    /******************************/
+    /**   OLD COOKIE HANDLINGT   **/
+    /******************************/
 
-    /**
-     * Adds our token cookie to the response
-     * @param response reference to the response
-     * @param token token value for the cookie
-     */
-    private void addCookie(HttpServletResponse response, String token)
-    {
-        Cookie cookie = setCookie("token", token, 1);
-        response.addCookie(cookie);   // response: reference to HttpServletResponse
-    }
+//    /**
+//     * Checks if the request contains the token cookie
+//     * @param request
+//     * @return true if the token is ok
+//     */
+//    private boolean checkCookie(HttpServletRequest request) {
+//        boolean ret = true;
+//
+//        return ret;
+//    }
+//
+//
+//    /**
+//     * Creates a cookie
+//     * @param key the cookie's name
+//     * @param value the cookie's value
+//     * @param maxHours the cookie's duration in hour
+//     * @return the crookie created
+//     */
+//    private static Cookie setCookie(String key, String value, int maxHours)
+//    {
+//        Cookie cookie = new Cookie(key, value);
+//        cookie.setMaxAge(maxHours * 60 * 60);  // (s)
+//        cookie.setPath("/");
+//
+//        return cookie;
+//    }
+//
+//    /**
+//     * Adds our token cookie to the response
+//     * @param response reference to the response
+//     * @param token token value for the cookie
+//     */
+//    private void addCookie(HttpServletResponse response, String token)
+//    {
+//        Cookie cookie = setCookie("token", token, 1);
+//        response.addCookie(cookie);   // response: reference to HttpServletResponse
+//    }
+//
+    /******************************/
+    /** END OLD COOKIE HANDLINGT **/
+    /******************************/
 }

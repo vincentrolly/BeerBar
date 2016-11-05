@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -31,16 +33,26 @@ public class BarCtrl {
     private BeerService beerService;
 
 
-    @CrossOrigin(origins = "http://localhost:8080")
     @RequestMapping(
             value = "",
             method = RequestMethod.GET)
-    public ResponseEntity<Iterable<Bar>> GetAll(HttpServletRequest request,
-                                                HttpServletResponse response) {
-        this.addCookie(response);
-        response.setHeader("Access-Control-Allow-Origin", "*");
+    public ResponseEntity<Iterable<Bar>> GetAll() {
+//        this.addCookie(response);
+//        Cookie coo = setCookie("token", "mytoken", 1);
+//        String scoo = coo.;
+//        response.setHeader("Access-Control-Allow-Origin", "*");
 
-        return new ResponseEntity<>(barService.all(), HttpStatus.CREATED);
+        HttpHeaders headers = new HttpHeaders();
+//        List<String> ll = new ArrayList<String>();
+////        ll.add("token=lolololo");
+////        ll.add("token=lolololo; Expires=Sat, 05-Nov-2016 14:02:53 GMT; Path=/");
+//        ll.add("token=lolololo; Path=/");
+//        headers.put("Set-Cookie", ll);
+        headers.put("Access-Control-Allow-Origin", Arrays.asList("http://localhost:3000"));
+        headers.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
+
+
+        return new ResponseEntity<>(barService.all(), headers, HttpStatus.CREATED);
     }
 
     @RequestMapping(
@@ -145,18 +157,25 @@ public class BarCtrl {
 //        return new ResponseEntity<>("Bar Not Found !!! Not add Beer !!!", HttpStatus.NOT_FOUND);
 //    }
 
-    private static Cookie setCookie(String key, String value, int maxHours)
-    {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(maxHours * 60 * 60);  // (s)
-        cookie.setPath("/");
 
-        return cookie;
-    }
-
-    private void addCookie(HttpServletResponse response)
-    {
-        Cookie cookie = setCookie("token", "lolololo", 1);
-        response.addCookie(cookie);   // response: reference to HttpServletResponse
-    }
+    /******************************/
+    /**   OLD COOKIE HANDLINGT   **/
+    /******************************/
+//    private static Cookie setCookie(String key, String value, int maxHours)
+//    {
+//        Cookie cookie = new Cookie(key, value);
+//        cookie.setMaxAge(maxHours * 60 * 60);  // (s)
+//        cookie.setPath("/");
+//
+//        return cookie;
+//    }
+//
+//    private void addCookie(HttpServletResponse response)
+//    {
+//        Cookie cookie = setCookie("token", "lolololo", 1);
+//        response.addCookie(cookie);   // response: reference to HttpServletResponse
+//    }
+    /******************************/
+    /** END OLD COOKIE HANDLINGT **/
+    /******************************/
 }
