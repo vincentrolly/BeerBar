@@ -37,8 +37,8 @@ public class BarCtrl {
             method = RequestMethod.GET)
     public ResponseEntity<Iterable<Bar>> GetAll(HttpServletRequest request,
                                                 HttpServletResponse response) {
-        Cookie cookie = setCookie("token", "lolololo", 1);
-        response.addCookie(cookie);   // response: reference to HttpServletResponse
+        this.addCookie(response);
+        response.setHeader("Access-Control-Allow-Origin", "*");
 
         return new ResponseEntity<>(barService.all(), HttpStatus.CREATED);
     }
@@ -152,5 +152,11 @@ public class BarCtrl {
         cookie.setPath("/");
 
         return cookie;
+    }
+
+    private void addCookie(HttpServletResponse response)
+    {
+        Cookie cookie = setCookie("token", "lolololo", 1);
+        response.addCookie(cookie);   // response: reference to HttpServletResponse
     }
 }
