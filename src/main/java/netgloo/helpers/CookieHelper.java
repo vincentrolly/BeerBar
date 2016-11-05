@@ -8,6 +8,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 
 /**
  * Created by ThaZalman on 05/11/2016.
@@ -66,7 +67,8 @@ public class CookieHelper {
 //        String cookieString = cookieToken.getName() + "=" + cookieToken.getValue() + "; Domain=" + cookieToken.getDomain() + "; Path=" + cookieToken.getPath() + "; Max-Age=" + cookieToken.getMaxAge();
 //        String cookieString = cookieToken.getName() + "=" + cookieToken.getValue() + "; Path=localhost; Expires=3600";// + sdate;
 
-        headers.put("Set-Cookie", Arrays.asList(tokenString));
-        headers.put("Set-Cookie", Arrays.asList(idString));
+        headers.put("Set-Cookie", Arrays.asList(tokenString, idString));
+//        headers.put("Set-Cookie", Arrays.asList(tokenString));
+//        headers.put("Set-Cookie", Arrays.asList(idString));
     }
 }

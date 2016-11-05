@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -45,7 +46,7 @@ public class BarCtrl extends ACtrl{
         headers.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
 
 
-        boolean cookieOk = this.checkCookie(reqHeaders.get("cookie"));
+        boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
         Iterable<Bar> retList;
         HttpStatus retStatus;
         if(cookieOk)
@@ -62,15 +63,40 @@ public class BarCtrl extends ACtrl{
         return new ResponseEntity<>(retList, headers, retStatus);
     }
 
+    /**
+     * Checks if the request's cookies contain the token, and verify this token with db
+     * @param cookies
+     * @return true if the token is ok
+     */
     private boolean checkCookie(List<String> cookies) {
         if(cookies == null || cookies.size() == 0)
             return false;
 
-        String cookieStr = cookies.get(0);
-        List<HttpCookie> coo = HttpCookie.parse(cookieStr);
-        int cooSize = coo == null
-            ? 0
-            : coo.size();
+
+        String[] cookiesStr = cookies.get(0).split(";");
+        ArrayList<HttpCookie> coo = new ArrayList<>();
+
+        for(String cooStr: cookiesStr) {
+            List<HttpCookie> ll = HttpCookie.parse(cooStr.trim());
+
+            if(ll.size() == 1)
+            {
+                coo.add(ll.get(0));
+            }
+            else
+            {
+                for(HttpCookie cook: ll)
+                    coo.add(cook);
+            }
+        }
+
+
+
+        int userId = 0,
+            cooSize = coo == null
+                    ? 0
+                    : coo.size();
+        String token = null;
 
         if(cooSize == 0)
             return false;
@@ -81,19 +107,43 @@ public class BarCtrl extends ACtrl{
 
             if(name.equals("token") )
             {
-                String tokenValue = coo.get(i).getValue(),
-                        // TODO get username from somewhere else
-                        username = "myusername";
-
-                return this.checkToken(username, tokenValue);
+                token = coo.get(i).getValue();
+            }
+            else if(name.equals("id") )
+            {
+                userId = stringToInt( coo.get(i).getValue() );
             }
         }
 
-        //System.out.println(cookieStr);
-        return false;
+        if(userId == 0 || token == null)
+            return false;
+
+        return this.checkToken(userId, token);
     }
 
-    private boolean checkToken(String username, String tokenValue) {
+    /**
+     * Converts a string to int
+     * @param value
+     * @return the int obtained, null if format exception
+     */
+    private static int stringToInt(String value) {
+        try
+        {
+            return Integer.parseInt(value);
+        }
+        catch (NumberFormatException nfe)
+        {
+            return 0;
+        }
+    }
+
+    /**
+     * Check if token value is the same as db data for a selected user
+     * @param userId the id of the user we want to match the token
+     * @param tokenValue
+     * @return true if the token matches
+     */
+    private boolean checkToken(int userId, String tokenValue) {
         // TODO check in db
         return true;
     }
