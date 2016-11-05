@@ -1,11 +1,6 @@
 package netgloo.controllers;
 
 import netgloo.helpers.CookieHelper;
-import netgloo.models.Bar;
-import netgloo.models.Beer;
-import netgloo.services.BarService;
-import netgloo.services.BeerService;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,35 +9,33 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
+
+import netgloo.models.User;
+import netgloo.services.LoginService;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.xml.bind.DatatypeConverter;
+import java.security.MessageDigest;
 
 /**
  * Created by vro on 08/10/16.
  */
 @Controller
 @RequestMapping("/login")
-public class LoginCtrl
+public class LoginCtrl extends ACtrl
 {
-//    @CrossOrigin(origins = "http://localhost:8080")
-//    @RequestMapping(
-//            value = "",
-//            method = RequestMethod.GET)
-//    public ResponseEntity<Iterable<Bar>> GetAll(HttpServletRequest request,
-//                                                HttpServletResponse response) {
-//        this.addCookie(response);
-//        response.setHeader("Access-Control-Allow-Origin", "*");
-//
-//        return new ResponseEntity<>(barService.all(), HttpStatus.CREATED);
-//    }
+ // ------------------------
+    // PRIVATE FIELDS
+    // ------------------------
+    @Autowired
+    private LoginService LoginService;
 
+/*
     @RequestMapping(
             value = "",
             method = RequestMethod.OPTIONS)
@@ -55,49 +48,73 @@ public class LoginCtrl
         ResponseEntity<Boolean> NewBar = new ResponseEntity<>(true, HttpStatus.OK);
         return NewBar;
     }
+*/
+
+    @RequestMapping(
+            value = "",
+            method = RequestMethod.OPTIONS)
+    @ResponseBody
+    public ResponseEntity ReplyOptions() {
+
+        HttpHeaders corsHeader = setCors();
+        return new ResponseEntity(null, corsHeader, HttpStatus.OK);
+    }
+
 
     @RequestMapping(
             value = "",
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<String> Create(@RequestBody String jsonLoginParams, @RequestHeader HttpHeaders headersReq)
+    public ResponseEntity<User> Create(@RequestBody LoginRequestParams params, @RequestHeader HttpHeaders headersReq)
     {
-        boolean ret = true;
-        JSONObject param = new JSONObject(jsonLoginParams);
+        boolean ret = false;
+        HttpStatus retStatus = HttpStatus.UNAUTHORIZED;
+        //JSONObject param = new JSONObject(jsonLoginParams);
         HttpHeaders headers = new HttpHeaders();
 
 
-        String test = param.getString("username");
+        //String test = param.getString("username");
+        //String test = params.getUsername();
 //        System.out.println(test);
 
 
 
         // check params
-        String userLogin = param.getString("username"),
-                userPass = param.getString("password");
-        ret = this.checkCredentials(userLogin, userPass);
+        String userLogin = params.getUsername(),
+                userPass = params.getPassword();
+        User user = this.checkCredentials(userLogin, userPass);
+        ret = user != null;
 
 
         String token = null;
 
         if(ret == true)
         {
-            token = createToken();
-
-            this.storeToken(userLogin, token);
-            String origin = headersReq.getOrigin();
-            CookieHelper.addCookie(headers, token, origin);
+            //token = createToken();
+            token = generateToken(params);
+  
+            this.storeToken(user, token);
+            // TODO remove origin if unused
+            CookieHelper.addCookie(headers, token, user.getUserId());
 
 //            response.setHeader("Access-Control-Allow-Origin", "*");
             headers.put("Access-Control-Allow-Origin", Arrays.asList("http://localhost:3000"));
             headers.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
+
+            retStatus = HttpStatus.OK;
+        }
+        else {
+            user = new User();
+            token = null;
         }
 
+        user.setPassword("");
+        user.setUsername("");
         if(token != null)
-            param.putOnce("token", token);
+            user.setToken(token);
 
-        ResponseEntity<String> NewBar = new ResponseEntity<>(param.toString(), headers, HttpStatus.OK);
+        ResponseEntity<User> NewBar = new ResponseEntity<>(user, headers, retStatus);
         return NewBar;
     }
 
@@ -105,29 +122,41 @@ public class LoginCtrl
      * Checks if a user exists in db, and checks if sumitted pass is correct
      * @param userLogin
      * @param userPass
-     * @return true if credentials are ok
+     * @return the user credentials are ok, null otherwise
      */
-    private boolean checkCredentials(String userLogin, String userPass) {
-        boolean ret = true;
+    private User checkCredentials(String userLogin, String userPass) {
+        //boolean ret = true;
 
         // TODO check userLogin and pass from db
+        User user = LoginService.getByName(userLogin);
 
-        return ret;
+        if(user == null)
+            return null;
+
+        if(!LoginService.comparePassword(user, userPass))
+            return null;
+
+
+
+        return user;
     }
 
     /**
      * Adds token to the user in db
-     * @param userLogin
+     * @param user
      * @param token
      */
-    private void storeToken(String userLogin, String token) {
+    private void storeToken(User user, String token) {
         // TODO sotre token for user in db
+        user.setToken(token);
+        LoginService.Update(user);
     }
 
     /**
      * Creates a token using current date, username
      * @return a sha256 encoded token
      */
+    /*
     private String createToken() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
@@ -137,54 +166,61 @@ public class LoginCtrl
 
         return sdate;
     }
+    */
+
+    private String generateToken(LoginRequestParams param)
+    {
+        String str = new String(DatatypeConverter.parseBase64Binary(param.getUsername() + param.getPassword() + new Date()));
+        String res = sha256(str);
+        return res;
+    }
+
+    public static String sha256(String base) {
+        try{
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(base.getBytes("UTF-8"));
+            StringBuffer hexString = new StringBuffer();
+
+            for (int i = 0; i < hash.length; i++) {
+                String hex = Integer.toHexString(0xff & hash[i]);
+                if(hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+
+            return hexString.toString();
+        } catch(Exception ex){
+            throw new RuntimeException(ex);
+        }
+    }
 
 
+    public static class LoginRequestParams
+    {
+        String username;
+        String password;
 
+        public LoginRequestParams() {
+        }
 
-    /******************************/
-    /**   OLD COOKIE HANDLINGT   **/
-    /******************************/
+        public LoginRequestParams(String username, String password) {
+            this.username = username;
+            this.password = password;
+        }
 
-//    /**
-//     * Checks if the request contains the token cookie
-//     * @param request
-//     * @return true if the token is ok
-//     */
-//    private boolean checkCookie(HttpServletRequest request) {
-//        boolean ret = true;
-//
-//        return ret;
-//    }
-//
-//
-//    /**
-//     * Creates a cookie
-//     * @param key the cookie's name
-//     * @param value the cookie's value
-//     * @param maxHours the cookie's duration in hour
-//     * @return the crookie created
-//     */
-//    private static Cookie setCookie(String key, String value, int maxHours)
-//    {
-//        Cookie cookie = new Cookie(key, value);
-//        cookie.setMaxAge(maxHours * 60 * 60);  // (s)
-//        cookie.setPath("/");
-//
-//        return cookie;
-//    }
-//
-//    /**
-//     * Adds our token cookie to the response
-//     * @param response reference to the response
-//     * @param token token value for the cookie
-//     */
-//    private void addCookie(HttpServletResponse response, String token)
-//    {
-//        Cookie cookie = setCookie("token", token, 1);
-//        response.addCookie(cookie);   // response: reference to HttpServletResponse
-//    }
-//
-    /******************************/
-    /** END OLD COOKIE HANDLINGT **/
-    /******************************/
+        public String getUsername() {
+            return username;
+        }
+
+        public void setUsername(String username) {
+            this.username = username;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+
+        public void setPassword(String password) {
+            this.password = password;
+        }
+    }
 }

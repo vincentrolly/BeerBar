@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -34,39 +35,33 @@ public class BarService {
 
     public Iterable<Bar> all()
     {
-        Iterable<Bar> jcsudsdc = IBarDao.findAll();
-        return jcsudsdc;
+        Iterable<Bar> listBars = IBarDao.findAll();
+
+        return listBars;
+    }
+
+    public Bar getById(long id)
+    {
+        return IBarDao.findOne(id);
     }
 
     public Bar Update(Bar bar)
     {
-        for(Bar barToUpdate : IBarDao.findAll())
-        {
-            if(barToUpdate.getName().equals(bar.getName())) {
-
-                barToUpdate.setAddress(bar.getAddress());
-                barToUpdate.setCity(bar.getCity());
-                barToUpdate.setDescription(bar.getDescription());
-                barToUpdate.setLatitude(bar.getLatitude());
-                barToUpdate.setLongitude(bar.getLongitude());
-                barToUpdate.setName(bar.getName());
-                barToUpdate.setPostalCode(bar.getPostalCode());
-                bar = IBarDao.save(barToUpdate);
-            }
-        }
-        return bar;
+        if(!Exist(bar.getBarId()))
+            return null;
+        return IBarDao.save(bar);
     }
 
-    public List<Bar> getAllByName(String name)
-    {
-        List<Bar> bars = new ArrayList<>();
-        for(Bar b : IBarDao.findAll())
-        {
-            if(b.getName().equals(name))
-                bars.add(b);
-        }
-        return bars;
-    }
+//    public List<Bar> getAllByName(String name)
+//    {
+//        List<Bar> bars = new ArrayList<>();
+//        for(Bar b : IBarDao.findAll())
+//        {
+//            if(b.getName().equals(name))
+//                bars.add(b);
+//        }
+//        return bars;
+//    }
 
     public List<Bar> getAll()
     {
@@ -80,19 +75,19 @@ public class BarService {
 
     public Bar getByName(String name)
     {
-        Bar bar = new Bar();
         for(Bar b : IBarDao.findAll())
         {
-            if(b.getName().equals(name))
-                bar = b;
+            if(b.getName().equals(name)) {
+                return b;
+            }
         }
-        return bar;
+        return null;
     }
 
-    public Bar get(long id)
-    {
-        return IBarDao.findOne(id);
-    }
+//    public Bar get(long id)
+//    {
+//        return IBarDao.findOne(id);
+//    }
 
     public boolean delete(Bar bar)
     {
@@ -103,37 +98,43 @@ public class BarService {
         return ret;
     }
 
-    public Bar create(String namebar)
+//    public Bar create(String namebar)
+//    {
+//        Bar bar;
+//        if(nameExist(namebar))
+//        {
+//            return null;
+//        }
+//
+//        //  TODO : call to api places google
+//
+//        bar = new Bar();
+//        bar.setName(namebar);
+//
+//
+//        bar.setAddress("t4t1g4t1g");
+//        bar.setCity("Lyon");
+//        bar.setDescription("titi toto tata");
+//        bar.setLatitude(4.7);
+//        bar.setListBeer(null);
+//        bar.setLongitude(5.8);
+//        bar.setPostalCode("13579");
+//
+//
+//        return IBarDao.save(bar);
+//    }
+
+
+
+    public boolean Exist(long id)
     {
-        Bar bar;
-        if(isExist(namebar))
-        {
-            bar = getByName(namebar);
-        }
-        else
-        {
-            bar = new Bar();
-            bar.setName(namebar);
-            bar.setAddress("t4t1g4t1g");
-            bar.setCity("Lyon");
-            bar.setDescription("titi toto tata");
-            bar.setLatitude(4.7);
-            bar.setListBeer(null);
-            bar.setLongitude(5.8);
-            bar.setPostalCode("13579");
-            IBarDao.save(bar);
-        }
-        return bar;
+        return getById(id) != null;
     }
 
-    public boolean isExist(String nameBar)
+    public boolean nameExist(String name)
     {
-        boolean ret = false;
-        if(getByName(nameBar) != null)
-            ret = true;
-        return ret;
+        return getByName(name) != null;
     }
-
 
     public boolean delete(long id)
     {
@@ -187,5 +188,29 @@ public class BarService {
             IBarDao.delete(bar);
         }
         return "Delete all ok";
+    }
+
+    public Bar create(String nameBar)
+    {
+        boolean res = nameExist(nameBar);
+        if(res)
+        {
+            return null;
+        }
+
+        //  TODO : call to api places google
+
+        Bar bar = new Bar();
+        bar.setName(nameBar);
+
+        bar.setAddress("t4t1g4t1g");
+        bar.setCity("Lyon");
+        bar.setDescription("titi toto tata");
+        bar.setLatitude(4.7);
+        bar.setListBeer(new HashSet<Beer>());
+        bar.setLongitude(5.8);
+        bar.setPostalCode("13579");
+
+        return IBarDao.save(bar);
     }
 }
