@@ -16,7 +16,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/bars")
-public class BarCtrl {
+public class BarCtrl extends ACtrl{
 
     // ------------------------
     // PRIVATE FIELDS
@@ -27,8 +27,6 @@ public class BarCtrl {
     @Autowired
     private BeerService beerService;
 
-
-    //    @CrossOrigin(origins = "http://localhost:8080")
     @RequestMapping(
             value = "",
             method = RequestMethod.GET)
@@ -70,9 +68,10 @@ public class BarCtrl {
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public ResponseEntity<Bar> Create(@RequestBody String NameBar) {
+        HttpHeaders corsHeader = setCors();
+        Bar response = barService.create(NameBar);
 
-        ResponseEntity<Bar> NewBar = new ResponseEntity<>(barService.create(NameBar), HttpStatus.CREATED);
-        return NewBar;
+        return new ResponseEntity<>(response, corsHeader,  HttpStatus.CREATED);
     }
 
     @RequestMapping(
@@ -104,17 +103,6 @@ public class BarCtrl {
         else
             return new ResponseEntity<>(beer, corsHeader, HttpStatus.NOT_FOUND);
     }
-
-    private static HttpHeaders setCors()
-    {
-        HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.set("Access-Control-Allow-Origin","*");
-        return responseHeaders;
-    }
-
-
-
-
 
 
 //        @RequestMapping(
