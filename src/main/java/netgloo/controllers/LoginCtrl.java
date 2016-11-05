@@ -1,11 +1,6 @@
 package netgloo.controllers;
 
 import netgloo.helpers.CookieHelper;
-import netgloo.models.Bar;
-import netgloo.models.Beer;
-import netgloo.services.BarService;
-import netgloo.services.BeerService;
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -14,36 +9,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
-import netgloo.models.IUserDao;
+
 import netgloo.models.User;
 import netgloo.services.LoginService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.*;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.DatatypeConverter;
-import java.io.Serializable;
 import java.security.MessageDigest;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
 
 /**
  * Created by vro on 08/10/16.
@@ -92,7 +69,7 @@ public class LoginCtrl extends ACtrl
     public ResponseEntity<User> Create(@RequestBody LoginRequestParams params, @RequestHeader HttpHeaders headersReq)
     {
         boolean ret = false;
-        HttpStatus retStatus = HttpStatus.UNAUTHORIZED
+        HttpStatus retStatus = HttpStatus.UNAUTHORIZED;
         //JSONObject param = new JSONObject(jsonLoginParams);
         HttpHeaders headers = new HttpHeaders();
 
@@ -119,14 +96,17 @@ public class LoginCtrl extends ACtrl
   
             this.storeToken(user, token);
             // TODO remove origin if unused
-            String origin = headersReq.getOrigin();
-            CookieHelper.addCookie(headers, token, origin);
+            CookieHelper.addCookie(headers, token, user.getUserId());
 
 //            response.setHeader("Access-Control-Allow-Origin", "*");
             headers.put("Access-Control-Allow-Origin", Arrays.asList("http://localhost:3000"));
             headers.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
 
             retStatus = HttpStatus.OK;
+        }
+        else {
+            user = new User();
+            token = null;
         }
 
         user.setPassword("");
@@ -148,7 +128,7 @@ public class LoginCtrl extends ACtrl
         //boolean ret = true;
 
         // TODO check userLogin and pass from db
-        User user = LoginService.getByName(params.getUsername());
+        User user = LoginService.getByName(userLogin);
 
         if(user == null)
             return null;
@@ -163,7 +143,7 @@ public class LoginCtrl extends ACtrl
 
     /**
      * Adds token to the user in db
-     * @param userLogin
+     * @param user
      * @param token
      */
     private void storeToken(User user, String token) {

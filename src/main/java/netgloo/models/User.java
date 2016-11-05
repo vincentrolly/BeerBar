@@ -10,6 +10,13 @@ import javax.validation.constraints.NotNull;
 @Table(name = "User")
 public class User {
 
+    public User() {
+        userId = 0;
+        username = "";
+        password = "";
+        token = "";
+    }
+
     public long getUserId() {
         return this.userId;
     }
