@@ -55,8 +55,6 @@ public class HttpURLConnectionExample {
      */
     public static String prepareRequestParams(HashMap<String, String> params, String charset)
     {
-        // TODO use Map<String, String>
-
         if(params == null || params.size() == 0)
             return null;
 
@@ -73,7 +71,6 @@ public class HttpURLConnectionExample {
 
                 param = URLEncoder.encode(key, charset) + "=" + URLEncoder.encode(value, charset);
 
-
                 if(isFirst)
                     isFirst = false;
                 else
@@ -88,12 +85,6 @@ public class HttpURLConnectionExample {
             e.printStackTrace();
             query = null;
         }
-            /*
-            query = String.format("param1=%s&param2=%s",
-                         URLEncoder.encode(param1, charset),
-                         URLEncoder.encode(param2, charset));
-            */
-
         return query;
     }
 

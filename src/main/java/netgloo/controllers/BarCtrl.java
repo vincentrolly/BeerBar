@@ -2,8 +2,10 @@ package netgloo.controllers;
 
 import netgloo.models.Bar;
 import netgloo.models.Beer;
+import netgloo.models.User;
 import netgloo.services.BarService;
 import netgloo.services.BeerService;
+import netgloo.services.LoginService;
 import org.hibernate.criterion.Restrictions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -35,7 +37,6 @@ public class BarCtrl extends ACtrl{
     @Autowired
     private BeerService beerService;
 
-
     @RequestMapping(
             value = "",
             method = RequestMethod.GET)
@@ -45,8 +46,9 @@ public class BarCtrl extends ACtrl{
         headers.put("Access-Control-Allow-Origin", Arrays.asList("http://localhost:3000"));
         headers.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
 
-
-        boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
+        //  TODO : remettre le check cookie
+//        boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
+        boolean cookieOk = true;
         Iterable<Bar> retList;
         HttpStatus retStatus;
         if(cookieOk)
@@ -72,7 +74,6 @@ public class BarCtrl extends ACtrl{
         if(cookies == null || cookies.size() == 0)
             return false;
 
-
         String[] cookiesStr = cookies.get(0).split(";");
         ArrayList<HttpCookie> coo = new ArrayList<>();
 
@@ -89,8 +90,6 @@ public class BarCtrl extends ACtrl{
                     coo.add(cook);
             }
         }
-
-
 
         int userId = 0,
             cooSize = coo == null
@@ -144,7 +143,17 @@ public class BarCtrl extends ACtrl{
      * @return true if the token matches
      */
     private boolean checkToken(int userId, String tokenValue) {
-        // TODO check in db
+        // on recupere l'utilisateur par son id
+        User user = LoginService.getById(userId);
+
+        // on verifie que l'utilisateur existe
+        if (user == null)
+            return false;
+
+        // on verifie que le token corresponde
+        if (!tokenValue.equals(user.getToken()))
+            return false;
+
         return true;
     }
 
@@ -181,6 +190,10 @@ public class BarCtrl extends ACtrl{
     @ResponseBody
     public ResponseEntity<Bar> Create(@RequestBody String NameBar) {
         HttpHeaders corsHeader = setCors();
+
+        if(NameBar.endsWith("\n"))
+            NameBar = NameBar.substring(0, NameBar.length() - 1);
+        
         Bar response = barService.create(NameBar);
 
         return new ResponseEntity<>(response, corsHeader,  HttpStatus.CREATED);

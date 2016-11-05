@@ -35,21 +35,6 @@ public class LoginCtrl extends ACtrl
     @Autowired
     private LoginService LoginService;
 
-/*
-    @RequestMapping(
-            value = "",
-            method = RequestMethod.OPTIONS)
-    @ResponseBody
-    public ResponseEntity<Boolean> Create(HttpServletRequest request,
-                                          HttpServletResponse response)
-    {
-        response.setHeader("Access-Control-Allow-Origin", "*");
-
-        ResponseEntity<Boolean> NewBar = new ResponseEntity<>(true, HttpStatus.OK);
-        return NewBar;
-    }
-*/
-
     @RequestMapping(
             value = "",
             method = RequestMethod.OPTIONS)
@@ -60,25 +45,17 @@ public class LoginCtrl extends ACtrl
         return new ResponseEntity(null, corsHeader, HttpStatus.OK);
     }
 
-
     @RequestMapping(
             value = "",
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<User> Create(@RequestBody LoginRequestParams params, @RequestHeader HttpHeaders headersReq)
+    public ResponseEntity<User> Login(@RequestBody LoginRequestParams params)
     {
         boolean ret = false;
         HttpStatus retStatus = HttpStatus.UNAUTHORIZED;
-        //JSONObject param = new JSONObject(jsonLoginParams);
-        HttpHeaders headers = new HttpHeaders();
-
-
-        //String test = param.getString("username");
-        //String test = params.getUsername();
-//        System.out.println(test);
-
-
+        HttpHeaders headers = setCors();
+        String token = null;
 
         // check params
         String userLogin = params.getUsername(),
@@ -86,31 +63,27 @@ public class LoginCtrl extends ACtrl
         User user = this.checkCredentials(userLogin, userPass);
         ret = user != null;
 
-
-        String token = null;
-
         if(ret == true)
         {
-            //token = createToken();
             token = generateToken(params);
   
             this.storeToken(user, token);
-            // TODO remove origin if unused
             CookieHelper.addCookie(headers, token, user.getUserId());
 
-//            response.setHeader("Access-Control-Allow-Origin", "*");
             headers.put("Access-Control-Allow-Origin", Arrays.asList("http://localhost:3000"));
             headers.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
 
             retStatus = HttpStatus.OK;
         }
-        else {
+        else
+        {
             user = new User();
             token = null;
         }
 
         user.setPassword("");
         user.setUsername("");
+
         if(token != null)
             user.setToken(token);
 
@@ -125,19 +98,17 @@ public class LoginCtrl extends ACtrl
      * @return the user credentials are ok, null otherwise
      */
     private User checkCredentials(String userLogin, String userPass) {
-        //boolean ret = true;
 
-        // TODO check userLogin and pass from db
+        // on recupere l'utilisateur par son login
         User user = LoginService.getByName(userLogin);
 
+        // on verifie que l'utilisateur existe
         if(user == null)
             return null;
 
-        if(!LoginService.comparePassword(user, userPass))
+        // on verifie que le password correspond
+        if(userPass.equals(user.getPassword()))
             return null;
-
-
-
         return user;
     }
 
@@ -147,27 +118,15 @@ public class LoginCtrl extends ACtrl
      * @param token
      */
     private void storeToken(User user, String token) {
-        // TODO sotre token for user in db
         user.setToken(token);
         LoginService.Update(user);
     }
 
     /**
      * Creates a token using current date, username
+     * @param param : param from body request
      * @return a sha256 encoded token
      */
-    /*
-    private String createToken() {
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();
-        String sdate = dateFormat.format(date); //2014/08/06 15:59:48
-
-        // TODO add username and sha256 it
-
-        return sdate;
-    }
-    */
-
     private String generateToken(LoginRequestParams param)
     {
         String str = new String(DatatypeConverter.parseBase64Binary(param.getUsername() + param.getPassword() + new Date()));
@@ -175,6 +134,11 @@ public class LoginCtrl extends ACtrl
         return res;
     }
 
+    /**
+     * Creates a token using current date, username
+     * @param base
+     * @return a sha256 encoded token
+     */
     public static String sha256(String base) {
         try{
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
@@ -192,7 +156,6 @@ public class LoginCtrl extends ACtrl
             throw new RuntimeException(ex);
         }
     }
-
 
     public static class LoginRequestParams
     {

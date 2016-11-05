@@ -14,6 +14,74 @@ public class GooglePlacesService {
 
     private static final String AIP_KOU = "AIzaSyDOoBhiWusApq1Od-vMIRZrnRO-G2GB62A";
 
+    private static boolean TestBoth()
+    {
+        String search = "Bar le robinson",
+                city = "";
+
+        // appel de l'api places et recuperation de la reponse json
+        JSONObject resp = TextSearch(search, city);
+        if(resp == null)
+        {
+            System.out.println("error parsing json");
+            return false;
+        }
+
+        // recuperer la reference a partir du json
+        String reference = getBarReferenceFromJsonText(resp);
+        if(reference == null)
+        {
+            System.out.println("error reference");
+            return false;
+        }
+
+        // interroger api_places details avec la reference et recuperation objet JSON
+        JSONObject respdet = Details(reference);
+        if(respdet == null)
+        {
+            System.out.println("error details");
+            return false;
+        }
+
+        // on cherche le nom du bar dans l'objet JSON de reponse
+        String nombar = getBarNameFromJsonDetails(respdet);
+        if(nombar == null)
+        {
+            System.out.println("error nom bar");
+            return false;
+        }
+        //  on ecrit le nom du bar
+        System.out.println("\t" + nombar);
+
+        return true;
+    }
+
+    private static String getBarNameFromJsonDetails(JSONObject resp)
+    {
+        if(resp == null)
+        {
+            System.out.println("error parsing json");
+            return null;
+        }
+
+        try {
+            JSONObject result = resp.getJSONObject("result");
+            if (result == null) {
+                System.out.println("error parsing array");
+                return null;
+            }
+            String name = result.getString("name");
+            System.out.println("\t" + name);
+            return name;
+        }
+        catch(Exception e)
+        {
+            System.out.println("\t" + "getBarFromJsonDetails error json");
+            System.out.println("\t" + e.getMessage());
+            return null;
+        }
+    }
+
     private static boolean TestDetails()
     {
         String reference = "CmRSAAAASHdPtI2UHoiIN47g0aRBi3b0wS3Y2_AcBizZXmeLjXQRM2EXmodOM-qKbl6VRP7D985RNIfJk7hqEN9Ursapma6P8ImncfoHFt0euhGKc9OvJ3keFW3ckYDYLh-eY-fcEhD0Wms6Th1m9W0hpKe9E9v7GhQkwEO8Krha-rB3wQpIBnhXeoxP4w";
@@ -43,6 +111,7 @@ public class GooglePlacesService {
                 city = "";
 //                city = "Le puy en velay";
 
+        // call to api_places with the bar in search variable
         JSONObject resp = TextSearch(search, city);
         if(resp == null)
         {
@@ -74,23 +143,67 @@ public class GooglePlacesService {
     }
 
     /**
+     * Get reference from bar
+     * @param resp JSON Object representing the bar from API Places
+     * @return Reference for the bar represented by the JsonObject
+     */
+    public static String getBarReferenceFromJsonText(JSONObject resp)
+    {
+        if(resp == null)
+        {
+            System.out.println("error parsing json");
+            return null;
+        }
+
+        try {
+            JSONArray results = resp.getJSONArray("results");
+            if (results == null) {
+                System.out.println("error parsing array");
+                return null;
+            }
+            if (results.length() == 0) {
+                System.out.println("no result");
+                return null;
+            }
+
+            int length = results.length();
+            System.out.println("Got " + length + " results.");
+
+            //  TODO : We choose the first bar
+            JSONObject first = (JSONObject) (results.get(0));
+            System.out.println("\t" + first.getString("reference"));
+
+            return first.getString("reference");
+        }
+        catch(Exception e)
+        {
+            System.out.println("\t" + "getBarFromJsonDetails error json");
+            System.out.println("\t" + e.getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Main for tests (run file directly)
      * @param args nothing
      */
     public static void main(String[] args){
-        String success = TestTextSeachr()
-                ? "succeeded"
-                : "failed";
-        System.out.println("TestTextSeachr " + success);
+//        String success = TestTextSeachr()
+//                ? "succeeded"
+//                : "failed";
+//        System.out.println("TestTextSeachr " + success);
+//
+//        success = TestDetails()
+//                ? "succeeded"
+//                : "failed";
+//        System.out.println("TestDetails " + success);
 
 
-        success = TestDetails()
+        String success = TestBoth()
                 ? "succeeded"
                 : "failed";
         System.out.println("TestDetails " + success);
-
     }
-
 
     /**
      * Calls Google Places API's text search for type 'bar'

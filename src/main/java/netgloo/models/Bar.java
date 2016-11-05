@@ -14,6 +14,7 @@ public class Bar
     private long barId;
 
     @NotNull
+    @Column(unique=true)
     private String name;
 
     @NotNull
@@ -45,7 +46,15 @@ public class Bar
     // PUBLIC METHODS
     // ------------------------
 
-    public Bar() { }
+    public Bar() {
+        name = "";
+        address = "";
+        city = "";
+        postalCode = "";
+        latitude = 0.0;
+        longitude = 0.0;
+        description = "";
+    }
 
 
     public Bar(String Name,

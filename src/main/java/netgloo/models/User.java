@@ -30,6 +30,7 @@ public class User {
     private long userId;
 
     @NotNull
+    @Column(unique=true)
     private String username;
 
     @NotNull
