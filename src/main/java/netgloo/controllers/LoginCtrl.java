@@ -79,10 +79,9 @@ public class LoginCtrl
         ret = this.checkCredentials(userLogin, userPass);
 
 
-        boolean cookieOk = true;
         String token = null;
 
-        if(ret == true && cookieOk)
+        if(ret == true)
         {
             token = createToken();
 
