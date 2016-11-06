@@ -28,8 +28,7 @@ public class HttpURLConnectionExample {
         HttpURLConnectionExample http = new HttpURLConnectionExample();
 
         System.out.println("Testing 1 - Send Http GET request");
-//        String url = "http://www.google.com/search?q=mkyong",
-//        String url = "https://maps.googleapis.com/maps/api/place/details/json?key=AIzaSyDOoBhiWusApq1Od-vMIRZrnRO-G2GB62A&reference=CmRSAAAAhyBS5z972gUNrFhQUWuNzmKTfgTu_0ZI0Ijq15DhK2edQwvuS5sHCt1bH0jrFhpRLMYyX8EHrC1krxjnrsLE9LRLf5tmXu7kjauVSJr2RqjIEunMMgqUyOa7jTCvuKCTEhCIhNIQWyKKzzjXnLIVHkvvGhRdRF9-0ZaNdEYq4xHPFnU-JFR6Mg",
+
         String url = "https://maps.googleapis.com/maps/api/place/details/json",
                 parameters = "";
 
@@ -39,12 +38,7 @@ public class HttpURLConnectionExample {
 
         parameters = prepareRequestParams(params, "UTF-8");
 
-//        System.out.println(parameters);
         JSONObject response = http.SendGetJson(url, parameters);
-
-//        System.out.println("\nTesting 2 - Send Http POST request");
-//        http.sendPost();
-
     }
 
     /**
@@ -138,52 +132,6 @@ public class HttpURLConnectionExample {
         }
         in.close();
 
-        //print result
-//        System.out.println(response.toString());
         return response.toString();
-
     }
-
-    // HTTP POST request
-//    private void sendPost() throws Exception {
-//
-//        String url = "https://selfsolve.apple.com/wcResults.do";
-//        URL obj = new URL(url);
-//        HttpsURLConnection con;
-//        con = (HttpsURLConnection) obj.openConnection();
-//
-//        //add reuqest header
-//        con.setRequestMethod("POST");
-//        con.setRequestProperty("User-Agent", USER_AGENT);
-//        con.setRequestProperty("Accept-Language", "en-US,en;q=0.5");
-//
-//        String urlParameters = "sn=C02G8416DRJM&cn=&locale=&caller=&num=12345";
-//
-//        // Send post request
-//        con.setDoOutput(true);
-//        DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-//        wr.writeBytes(urlParameters);
-//        wr.flush();
-//        wr.close();
-//
-//        int responseCode = con.getResponseCode();
-//        System.out.println("\nSending 'POST' request to URL : " + url);
-//        System.out.println("Post parameters : " + urlParameters);
-//        System.out.println("Response Code : " + responseCode);
-//
-//        BufferedReader in = new BufferedReader(
-//                new InputStreamReader(con.getInputStream()));
-//        String inputLine;
-//        StringBuffer response = new StringBuffer();
-//
-//        while ((inputLine = in.readLine()) != null) {
-//            response.append(inputLine);
-//        }
-//        in.close();
-//
-//        //print result
-//        System.out.println(response.toString());
-//
-//    }
-
 }
