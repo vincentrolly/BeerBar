@@ -37,7 +37,7 @@ public class CookieHelper {
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(maxHours * 60 * 60);  // (s)
         cookie.setPath("/");
-        cookie.setDomain("https://davanture.fr:3000");
+        cookie.setDomain("http://davanture.fr:3000");
 
         return cookie;
     }
@@ -58,5 +58,11 @@ public class CookieHelper {
                 idString = cookieId.getName() + "=" + cookieId.getValue() + "; Path=" + cookieId.getPath() + "; Max-Age=" + cookieId.getMaxAge();
 
         headers.put("Set-Cookie", Arrays.asList(tokenString, idString));
+
+        System.out.println("=====================");
+        System.out.println("Cookie added");
+        System.out.println(tokenString);
+        System.out.println(idString);
+        System.out.println("=====================");
     }
 }
