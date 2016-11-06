@@ -56,6 +56,11 @@ public class GooglePlacesService {
         return true;
     }
 
+    /**
+     * Get details for the bar found in the API places GOOGLE
+     * @param resp jsonobject response
+     * @return
+     */
     private static String getBarNameFromJsonDetails(JSONObject resp)
     {
         if(resp == null)
@@ -216,7 +221,6 @@ public class GooglePlacesService {
         String textSearch = city == null || city.length() == 0
                 ? text
                 : text + ", " + city;
-//        textSearch = textSearch.replaceAll(" ", "+");
 
         HttpURLConnectionExample http = new HttpURLConnectionExample();
 
