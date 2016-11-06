@@ -194,13 +194,13 @@ public class BarCtrl extends ACtrl{
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<Bar> Create(@RequestBody String NameBar) {
+    public ResponseEntity<Bar> Create(@RequestBody Bar bar) {
         HttpHeaders corsHeader = setCors();
 
-        if(NameBar.endsWith("\n"))
-            NameBar = NameBar.substring(0, NameBar.length() - 1);
-        
-        Bar response = barService.create(NameBar);
+        if(bar.getName().endsWith("\n"))
+            bar.setName(bar.getName().substring(0, bar.getName().length() - 1));
+
+        Bar response = barService.create(bar);
 
         return new ResponseEntity<>(response, corsHeader,  HttpStatus.CREATED);
     }

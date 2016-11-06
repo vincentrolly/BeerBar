@@ -187,30 +187,16 @@ public class BarService {
         return "Delete all ok";
     }
 
-    public Bar create(String nameBar)
+    public Bar create(Bar bar)
     {
-        boolean res = nameExist(nameBar);
+        boolean res = nameExist(bar.getName());
         if(res)
         {
             return null;
         }
 
-                //  TODO : call to api places google
-        Bar bar = getBarFromGooglePlaces(nameBar);
-
-
-//        Bar bar = new Bar();
-//        bar.setName(nameBar);
-//
-//        bar.setAddress("t4t1g4t1g");
-//        bar.setCity("Lyon");
-//        bar.setDescription("titi toto tata");
-//        bar.setLatitude(4.7);
-//        bar.setListBeer(new HashSet<Beer>());
-//        bar.setLongitude(5.8);
-//        bar.setPostalCode("13579");
-
-        return IBarDao.save(bar);
+        Bar barNew = getBarFromGooglePlaces(bar.getName(), bar.getCity());
+        return IBarDao.save(barNew);
     }
 
     /**
@@ -219,10 +205,10 @@ public class BarService {
      * @param nameBar : nom du bar a chercher
      * @return
      */
-    private Bar getBarFromGooglePlaces(String nameBar)
+    private Bar getBarFromGooglePlaces(String nameBar, String CityBar)
     {
         String search = nameBar,
-                city = "FRANCE";
+                city = CityBar;
 
         // appel de l'api places et recuperation de la reponse json
         JSONObject resp = GooglePlacesService.TextSearch(search, city);
@@ -291,7 +277,7 @@ public class BarService {
 
             bar.setDescription("");
             bar.setName(respdet.getString("name"));
-            
+
             setBarCoordinates(bar, respdet.getJSONObject("geometry"));
 
             return bar;
