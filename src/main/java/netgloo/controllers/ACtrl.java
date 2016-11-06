@@ -1,14 +1,9 @@
 package netgloo.controllers;
 
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by vro on 04/11/16.

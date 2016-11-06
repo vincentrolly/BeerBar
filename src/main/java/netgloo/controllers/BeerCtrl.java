@@ -1,18 +1,13 @@
 package netgloo.controllers;
 
-import netgloo.models.Bar;
 import netgloo.models.Beer;
-import netgloo.models.IBeerDao;
 import netgloo.services.BeerService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * Created by vro on 08/10/16.

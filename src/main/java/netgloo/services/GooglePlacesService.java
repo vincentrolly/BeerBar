@@ -6,7 +6,6 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 
-
 /**
  * Created by ThaZalman on 04/11/2016.
  */
@@ -112,9 +111,7 @@ public class GooglePlacesService {
     private static boolean TestTextSeachr()
     {
         String search = "Bar le robinson",
-//                city = "43000"
                 city = "";
-//                city = "Le puy en velay";
 
         // call to api_places with the bar in search variable
         JSONObject resp = TextSearch(search, city);
@@ -174,7 +171,6 @@ public class GooglePlacesService {
             int length = results.length();
             System.out.println("Got " + length + " results.");
 
-            //  TODO : We choose the first bar
             JSONObject first = (JSONObject) (results.get(0));
             System.out.println("\t" + first.getString("reference"));
 
@@ -193,18 +189,18 @@ public class GooglePlacesService {
      * @param args nothing
      */
     public static void main(String[] args){
-//        String success = TestTextSeachr()
-//                ? "succeeded"
-//                : "failed";
-//        System.out.println("TestTextSeachr " + success);
-//
-//        success = TestDetails()
-//                ? "succeeded"
-//                : "failed";
-//        System.out.println("TestDetails " + success);
+        String success = TestTextSeachr()
+                ? "succeeded"
+                : "failed";
+        System.out.println("TestTextSeachr " + success);
+
+        success = TestDetails()
+                ? "succeeded"
+                : "failed";
+        System.out.println("TestDetails " + success);
 
 
-        String success = TestBoth()
+        success = TestBoth()
                 ? "succeeded"
                 : "failed";
         System.out.println("TestDetails " + success);
@@ -225,7 +221,6 @@ public class GooglePlacesService {
         HttpURLConnectionExample http = new HttpURLConnectionExample();
 
         System.out.println("Send Http GET request");
-//        String url = "https://maps.googleapis.com/maps/api/place/details/json",
         String url = "https://maps.googleapis.com/maps/api/place/textsearch/json",
                 parameters = "";
 
@@ -236,7 +231,6 @@ public class GooglePlacesService {
 
         parameters = HttpURLConnectionExample.prepareRequestParams(params, "UTF-8");
 
-//        System.out.println(parameters);
         try {
             return http.SendGetJson(url, parameters);
         } catch (Exception e) {
@@ -247,10 +241,8 @@ public class GooglePlacesService {
 
     public static JSONObject Details(String reference)
     {
-        //HttpURLConnectionExample http = new HttpURLConnectionExample();
-
         System.out.println("Send Http GET request");
-//        String url = "https://maps.googleapis.com/maps/api/place/details/json",
+
         String url = "https://maps.googleapis.com/maps/api/place/details/json",
                 parameters = "";
 
@@ -260,7 +252,6 @@ public class GooglePlacesService {
 
         parameters = HttpURLConnectionExample.prepareRequestParams(params, "UTF-8");
 
-//        System.out.println(parameters);
         try {
             return HttpURLConnectionExample.SendGetJson(url, parameters);
         } catch (Exception e) {
@@ -268,7 +259,4 @@ public class GooglePlacesService {
             return null;
         }
     }
-
-
-
 }

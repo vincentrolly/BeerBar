@@ -1,13 +1,10 @@
 package netgloo.services;
 
-import com.fasterxml.jackson.databind.util.JSONPObject;
-import netgloo.controllers.BeerCtrl;
 import netgloo.models.Bar;
 import netgloo.models.Beer;
 import netgloo.models.IBarDao;
 import netgloo.models.IBeerDao;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
