@@ -25,18 +25,10 @@ import netgloo.services.GooglePlacesService;
 public class BarService {
 
     @Autowired
-    IBarDao IBarDao;
+    private IBarDao IBarDao;
 
-//    private void addExampleBeer(Bar bar)
-//    {
-//        Beer beer = new Beer();
-//        beer.setDegree(4);
-//        beer.setBeerId(20);
-//        beer.setName("Dechire sa race");
-//        bar.addBeer(beer, 33, 15);
-//
-//        //return bar;
-//    }
+    @Autowired
+    IBeerDao IBeerDao;
 
     public Iterable<Bar> all()
     {
@@ -56,17 +48,6 @@ public class BarService {
             return null;
         return IBarDao.save(bar);
     }
-
-//    public List<Bar> getAllByName(String name)
-//    {
-//        List<Bar> bars = new ArrayList<>();
-//        for(Bar b : IBarDao.findAll())
-//        {
-//            if(b.getName().equals(name))
-//                bars.add(b);
-//        }
-//        return bars;
-//    }
 
     public List<Bar> getAll()
     {
@@ -89,10 +70,48 @@ public class BarService {
         return null;
     }
 
-//    public Bar get(long id)
-//    {
-//        return IBarDao.findOne(id);
-//    }
+    public Bar addBeerToBar(String nameBar,
+                            Beer beer, BeerService beerService)
+    {
+        //BeerService beerService = new BeerService();
+
+        // on recupere la biere par son nom depuis la base de donnees
+        Beer beerExist = beerService.getByName(beer.getName());
+
+        boolean isInList = false;
+
+        // on verifie que la biere existe
+        if(beerExist == null)
+        {
+            // elle existe pas, on la cree
+            beerService.create(beer);
+        }
+
+        // Recuperer le bar a partir de son nom
+        Bar bar = this.getByName(nameBar);
+
+        if(bar == null)
+            return null;
+        else
+        {
+            // bartrouve : je recup sa liste de biere
+            Set<Beer> listBeer = bar.getListBeer();
+            for (Beer oneBeer : listBeer)
+            {
+                if(oneBeer.getName().equals(beer.getName())) {
+                    isInList = true;
+                    break;
+                }
+            }
+            if(!isInList)
+            {
+                // Si biere non presente dans sa liste, on la rajoute
+                bar.AddBeer(beer);
+                Update(bar);
+            }
+        }
+        return bar;
+    }
 
     public boolean delete(Bar bar)
     {

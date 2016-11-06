@@ -147,6 +147,10 @@ public class Bar
         this.listBeer = listBeer;
     }
 
+    public void AddBeer(Beer beer) {
+        listBeer.add(beer);
+    }
+
 //    public void addBeer(Beer b, int qte, int price)
 //    {
 //        BeerBar association = new BeerBar();

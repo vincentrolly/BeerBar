@@ -64,7 +64,7 @@ public class HttpURLConnectionExample {
         try {
             Iterator it = params.entrySet().iterator();
             while (it.hasNext()) {
-                HashMap.Entry pair = (HashMap.Entry)it.next();
+                Map.Entry pair = (Map.Entry)it.next();
                 String key = pair.getKey().toString(),
                         value = pair.getValue().toString(),
                         param = null;

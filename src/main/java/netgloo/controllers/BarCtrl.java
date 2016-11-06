@@ -35,7 +35,13 @@ public class BarCtrl extends ACtrl{
     private BarService barService;
 
     @Autowired
+    private LoginService loginService;
+
+    @Autowired
     private BeerService beerService;
+
+
+//    private BeerService beerService = new BeerService();
 
     @RequestMapping(
             value = "",
@@ -144,7 +150,7 @@ public class BarCtrl extends ACtrl{
      */
     private boolean checkToken(int userId, String tokenValue) {
         // on recupere l'utilisateur par son id
-        User user = LoginService.getById(userId);
+        User user = loginService.getById(userId);
 
         // on verifie que l'utilisateur existe
         if (user == null)
@@ -229,4 +235,24 @@ public class BarCtrl extends ACtrl{
             return new ResponseEntity<>(beer, corsHeader, HttpStatus.NOT_FOUND);
     }
 
+    @RequestMapping(
+            value = "/{barname}/beers",
+            method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody ResponseEntity<Bar> addBeerToBar(@RequestBody Beer beer,
+                                                   @PathVariable("barname") String barname)
+    {
+        barname = barname.replace("+", " ");
+
+        HttpHeaders corsHeader = setCors();
+
+        Bar bar = barService.addBeerToBar(barname, beer, beerService);
+
+        HttpStatus status = HttpStatus.OK;
+
+        if(bar == null)
+            status = HttpStatus.NOT_FOUND;
+
+        return new ResponseEntity<>(bar, corsHeader, status);
+    }
 }
