@@ -56,7 +56,6 @@ public class Bar
         description = "";
     }
 
-
     public Bar(String Name,
                String Address,
                String City,
@@ -150,28 +149,4 @@ public class Bar
     public void AddBeer(Beer beer) {
         listBeer.add(beer);
     }
-
-//    public void addBeer(Beer b, int qte, int price)
-//    {
-//        BeerBar association = new BeerBar();
-//        association.setBeer(b);
-//        // TODO check if needed
-//        //association.setBar(this);
-//        association.setPrice(price);
-//        association.setQuantity(qte);
-//
-//
-//
-//        this.beers.add(association);
-//        // Also add the association object to the employee.
-//        b.getBars().add(association);
-//    }
-
-//    public Set<Beer> getListBeer() {
-//        return this.listBeer;
-//    }
-//
-//    public void setListBeer(Set<Beer> listBeer) {
-//        this.listBeer = listBeer;
-//    }
 }
