@@ -64,13 +64,12 @@ public class HttpURLConnectionExample {
         try {
             Iterator it = params.entrySet().iterator();
             while (it.hasNext()) {
-                HashMap.Entry pair = (HashMap.Entry)it.next();
+                Map.Entry pair = (Map.Entry)it.next();
                 String key = pair.getKey().toString(),
                         value = pair.getValue().toString(),
                         param = null;
 
                 param = URLEncoder.encode(key, charset) + "=" + URLEncoder.encode(value, charset);
-
 
                 if(isFirst)
                     isFirst = false;
@@ -86,12 +85,6 @@ public class HttpURLConnectionExample {
             e.printStackTrace();
             query = null;
         }
-            /*
-            query = String.format("param1=%s&param2=%s",
-                         URLEncoder.encode(param1, charset),
-                         URLEncoder.encode(param2, charset));
-            */
-
         return query;
     }
 

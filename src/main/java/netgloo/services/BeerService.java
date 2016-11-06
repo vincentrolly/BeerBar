@@ -5,6 +5,7 @@ import netgloo.models.Beer;
 import netgloo.models.IBarDao;
 import netgloo.models.IBeerDao;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -57,7 +58,11 @@ public class BeerService {
     public Beer getByName(String nameBeer)
     {
         Beer beer = new Beer();
-        for(Beer allBeer : IBeerDao.findAll())
+        Iterable<Beer> it = IBeerDao.findAll();
+
+        if(it == null)
+            beer = null;
+        for(Beer allBeer : it)
         {
             if(allBeer.getName().equals(nameBeer))
                 beer = allBeer;

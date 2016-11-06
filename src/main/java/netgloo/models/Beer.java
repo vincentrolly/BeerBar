@@ -14,6 +14,7 @@ public class Beer
     private long beerId;
 
     @NotNull
+    @Column(unique=true)
     private String name;
 
     @NotNull

@@ -40,29 +40,22 @@ public class LoginCtrl extends ACtrl
             method = RequestMethod.OPTIONS)
     @ResponseBody
     public ResponseEntity ReplyOptions() {
+
         HttpHeaders corsHeader = setCors();
         return new ResponseEntity(null, corsHeader, HttpStatus.OK);
     }
-
 
     @RequestMapping(
             value = "",
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<User> Create(@RequestBody LoginRequestParams params)
+    public ResponseEntity<User> Login(@RequestBody LoginRequestParams params)
     {
         boolean ret = false;
         HttpStatus retStatus = HttpStatus.UNAUTHORIZED;
-        //JSONObject param = new JSONObject(jsonLoginParams);
         HttpHeaders headers = setCors();
-
-
-        //String test = param.getString("username");
-        //String test = params.getUsername();
-//        System.out.println(test);
-
-
+        String token = null;
 
         // check params
         String userLogin = params.getUsername(),
@@ -70,29 +63,27 @@ public class LoginCtrl extends ACtrl
         User user = this.checkCredentials(userLogin, userPass);
         ret = user != null;
 
-
-        String token = null;
-
         if(ret == true)
         {
-            //token = createToken();
             token = generateToken(params);
   
             this.storeToken(user, token);
             CookieHelper.addCookie(headers, token, user.getUserId());
 
-//            response.setHeader("Access-Control-Allow-Origin", "*");
-
+            headers.put("Access-Control-Allow-Origin", Arrays.asList("http://localhost:3000"));
+            headers.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
 
             retStatus = HttpStatus.OK;
         }
-        else {
+        else
+        {
             user = new User();
             token = null;
         }
 
         user.setPassword("");
         user.setUsername("");
+
         if(token != null)
             user.setToken(token);
 
@@ -107,21 +98,17 @@ public class LoginCtrl extends ACtrl
      * @return the user credentials are ok, null otherwise
      */
     private User checkCredentials(String userLogin, String userPass) {
-        //boolean ret = true;
 
-        // on recupere le user par son login
+        // on recupere l'utilisateur par son login
         User user = LoginService.getByName(userLogin);
 
-        // on verifie que le user existe
+        // on verifie que l'utilisateur existe
         if(user == null)
             return null;
 
-        // on verifie que le pass correspond
+        // on verifie que le password correspond
         if(userPass.equals(user.getPassword()))
             return null;
-
-
-
         return user;
     }
 
@@ -137,7 +124,7 @@ public class LoginCtrl extends ACtrl
 
     /**
      * Creates a token using current date, username
-     * @param param param from body request
+     * @param param : param from body request
      * @return a sha256 encoded token
      */
     private String generateToken(LoginRequestParams param)
@@ -148,9 +135,9 @@ public class LoginCtrl extends ACtrl
     }
 
     /**
-     * Encode a string to sha256
-     * @param base clear string
-     * @return encoded string
+     * Creates a token using current date, username
+     * @param base
+     * @return a sha256 encoded token
      */
     public static String sha256(String base) {
         try{
@@ -170,10 +157,6 @@ public class LoginCtrl extends ACtrl
         }
     }
 
-
-    /**
-     * Model class for login parameters
-     */
     public static class LoginRequestParams
     {
         String username;

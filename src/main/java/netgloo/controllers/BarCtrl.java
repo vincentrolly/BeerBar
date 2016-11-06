@@ -35,20 +35,26 @@ public class BarCtrl extends ACtrl{
     private BarService barService;
 
     @Autowired
+    private LoginService loginService;
+
+    @Autowired
     private BeerService beerService;
 
+
+//    private BeerService beerService = new BeerService();
 
     @RequestMapping(
             value = "",
             method = RequestMethod.GET)
     public ResponseEntity<Iterable<Bar>> GetAll(@RequestHeader HttpHeaders reqHeaders) {
-        HttpHeaders headers = setCors();
+        HttpHeaders headers = new HttpHeaders();
 
-//        headers.put("Access-Control-Allow-Origin", Arrays.asList("http://localhost:3000"));
-//        headers.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
+        headers.put("Access-Control-Allow-Origin", Arrays.asList("http://localhost:3000"));
+        headers.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
 
-
-        boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
+        //  TODO : remettre le check cookie
+//        boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
+        boolean cookieOk = true;
         Iterable<Bar> retList;
         HttpStatus retStatus;
         if(cookieOk)
@@ -74,7 +80,6 @@ public class BarCtrl extends ACtrl{
         if(cookies == null || cookies.size() == 0)
             return false;
 
-
         String[] cookiesStr = cookies.get(0).split(";");
         ArrayList<HttpCookie> coo = new ArrayList<>();
 
@@ -91,8 +96,6 @@ public class BarCtrl extends ACtrl{
                     coo.add(cook);
             }
         }
-
-
 
         int userId = 0,
             cooSize = coo == null
@@ -146,15 +149,15 @@ public class BarCtrl extends ACtrl{
      * @return true if the token matches
      */
     private boolean checkToken(int userId, String tokenValue) {
-        // on recupere le user par son id
-        User user = LoginService.getById(userId);
+        // on recupere l'utilisateur par son id
+        User user = loginService.getById(userId);
 
-        // on verifie que le user existe
-        if(user == null)
+        // on verifie que l'utilisateur existe
+        if (user == null)
             return false;
 
-        // on verifie que le token correspond
-        if(!tokenValue.equals(user.getToken()))
+        // on verifie que le token corresponde
+        if (!tokenValue.equals(user.getToken()))
             return false;
 
         return true;
@@ -193,6 +196,10 @@ public class BarCtrl extends ACtrl{
     @ResponseBody
     public ResponseEntity<Bar> Create(@RequestBody String NameBar) {
         HttpHeaders corsHeader = setCors();
+
+        if(NameBar.endsWith("\n"))
+            NameBar = NameBar.substring(0, NameBar.length() - 1);
+        
         Bar response = barService.create(NameBar);
 
         return new ResponseEntity<>(response, corsHeader,  HttpStatus.CREATED);
@@ -228,4 +235,24 @@ public class BarCtrl extends ACtrl{
             return new ResponseEntity<>(beer, corsHeader, HttpStatus.NOT_FOUND);
     }
 
+    @RequestMapping(
+            value = "/{barname}/beers",
+            method = RequestMethod.POST,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody ResponseEntity<Bar> addBeerToBar(@RequestBody Beer beer,
+                                                   @PathVariable("barname") String barname)
+    {
+        barname = barname.replace("+", " ");
+
+        HttpHeaders corsHeader = setCors();
+
+        Bar bar = barService.addBeerToBar(barname, beer, beerService);
+
+        HttpStatus status = HttpStatus.OK;
+
+        if(bar == null)
+            status = HttpStatus.NOT_FOUND;
+
+        return new ResponseEntity<>(bar, corsHeader, status);
+    }
 }
