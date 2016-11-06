@@ -33,7 +33,7 @@ public class LoginCtrl extends ACtrl
     // PRIVATE FIELDS
     // ------------------------
     @Autowired
-    private LoginService LoginService;
+    LoginService LoginService;
 
     @RequestMapping(
             value = "",
@@ -107,7 +107,7 @@ public class LoginCtrl extends ACtrl
             return null;
 
         // on verifie que le password correspond
-        if(userPass.equals(user.getPassword()))
+        if(!userPass.equals(user.getPassword()))
             return null;
         return user;
     }

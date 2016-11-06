@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class LoginService {
 
     @Autowired
-    private static IUserDao iUserDao;
+    IUserDao iUserDao;
 
     public User getByName(String name)
     {
@@ -45,7 +45,7 @@ public class LoginService {
         return getById(userId) != null;
     }
 
-    public static User getById(long id)
+    public User getById(long id)
     {
         return iUserDao.findOne(id);
     }

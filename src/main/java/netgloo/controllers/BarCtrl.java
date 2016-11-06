@@ -255,4 +255,14 @@ public class BarCtrl extends ACtrl{
 
         return new ResponseEntity<>(bar, corsHeader, status);
     }
+
+    @RequestMapping(
+            value = "/{barname}/beers",
+            method = RequestMethod.OPTIONS)
+    @ResponseBody
+    public ResponseEntity ReplyOptionsBeer() {
+
+        HttpHeaders corsHeader = setCors();
+        return new ResponseEntity(null, corsHeader, HttpStatus.OK);
+    }
 }
