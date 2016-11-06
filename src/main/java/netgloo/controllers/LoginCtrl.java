@@ -109,8 +109,6 @@ public class LoginCtrl extends ACtrl
   
             this.storeToken(user, token);
             CookieHelper.addCookie(headers, token, user.getUserId());
-
-            headers = setCors();
             retStatus = HttpStatus.OK;
         }
         else

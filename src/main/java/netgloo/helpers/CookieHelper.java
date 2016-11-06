@@ -37,7 +37,7 @@ public class CookieHelper {
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(maxHours * 60 * 60);  // (s)
         cookie.setPath("/");
-        cookie.setDomain("http://davanture.fr:3000");
+        cookie.setDomain("https://davanture.fr:3000");
 
         return cookie;
     }
