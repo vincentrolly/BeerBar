@@ -40,18 +40,15 @@ public class BarCtrl extends ACtrl{
     @Autowired
     private BeerService beerService;
 
+    private boolean ActivateCookie = true;
+
     @RequestMapping(
             value = "",
             method = RequestMethod.GET)
     public ResponseEntity<Iterable<Bar>> GetAll(@RequestHeader HttpHeaders reqHeaders) {
-        HttpHeaders headers = new HttpHeaders();
+        HttpHeaders headers = setCors();
 
-        headers.put("Access-Control-Allow-Origin", Arrays.asList("http://localhost:3000"));
-        headers.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
-
-        //  TODO : remettre le check cookie
-//        boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
-        boolean cookieOk = true;
+        boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
         Iterable<Bar> retList;
         HttpStatus retStatus;
         if(cookieOk)
@@ -83,15 +80,25 @@ public class BarCtrl extends ACtrl{
             method = RequestMethod.PUT,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<Bar> updateBar(@RequestBody Bar bar) {
+    public ResponseEntity<Bar> updateBar(@RequestBody Bar bar,
+                                         @RequestHeader HttpHeaders reqHeaders) {
         final HttpHeaders corsHeader = setCors();
 
-        Bar barUpdate = barService.Update(bar);
-        HttpStatus status = HttpStatus.OK;
-        if (barUpdate == null)
-            status = HttpStatus.NOT_FOUND;
-
-        return new ResponseEntity<>(barUpdate, corsHeader, status);
+        boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
+        HttpStatus retStatus;
+        Bar barUpdate;
+        if(cookieOk) {
+            barUpdate = barService.Update(bar);
+            retStatus = HttpStatus.OK;
+            if (barUpdate == null)
+                retStatus = HttpStatus.NOT_FOUND;
+        }
+        else
+        {
+            barUpdate = null;
+            retStatus = HttpStatus.UNAUTHORIZED;
+        }
+        return new ResponseEntity<>(barUpdate, corsHeader, retStatus);
     }
 
     @RequestMapping(
@@ -99,14 +106,26 @@ public class BarCtrl extends ACtrl{
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<Bar> Create(@RequestBody Bar bar) {
+    public ResponseEntity<Bar> Create(@RequestBody Bar bar,
+                                      @RequestHeader HttpHeaders reqHeaders) {
         HttpHeaders corsHeader = setCors();
 
-        if(bar.getName().endsWith("\n"))
-            bar.setName(bar.getName().substring(0, bar.getName().length() - 1));
+        boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
+        HttpStatus retStatus;
+        Bar response;
+        if(cookieOk) {
+            if (bar.getName().endsWith("\n"))
+                bar.setName(bar.getName().substring(0, bar.getName().length() - 1));
 
-        Bar response = barService.create(bar);
-        return new ResponseEntity<>(response, corsHeader,  HttpStatus.CREATED);
+            retStatus = HttpStatus.CREATED;
+            response = barService.create(bar);
+        }
+        else
+        {
+            retStatus = HttpStatus.UNAUTHORIZED;
+            response = null;
+        }
+        return new ResponseEntity<>(response, corsHeader, retStatus);
     }
 
     @RequestMapping(
@@ -114,12 +133,23 @@ public class BarCtrl extends ACtrl{
             method = RequestMethod.DELETE,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<Bar> deleteBar(@RequestBody Bar bar) {
+    public ResponseEntity<Bar> deleteBar(@RequestBody Bar bar,
+                                         @RequestHeader HttpHeaders reqHeaders) {
         HttpHeaders corsHeader = setCors();
-        if (barService.delete(bar.getName()))
-            return new ResponseEntity<>(bar, corsHeader, HttpStatus.OK);
+
+        boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
+        HttpStatus retStatus;
+
+        if(cookieOk) {
+            retStatus = HttpStatus.OK;
+            if (!barService.delete(bar.getName()))
+                retStatus = HttpStatus.NOT_FOUND;
+        }
         else
-            return new ResponseEntity<>(bar, corsHeader, HttpStatus.NOT_FOUND);
+        {
+            retStatus = HttpStatus.UNAUTHORIZED;
+        }
+        return new ResponseEntity<>(bar, corsHeader, retStatus);
     }
 
     @RequestMapping(
@@ -127,16 +157,27 @@ public class BarCtrl extends ACtrl{
             method = RequestMethod.DELETE,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public ResponseEntity<Beer> deleteBeer(@RequestBody Beer beer) {
+    public ResponseEntity<Beer> deleteBeer(@RequestBody Beer beer,
+                                           @RequestHeader HttpHeaders reqHeaders) {
         List<Bar> listBars = beerService.getBarsWithThisBeer(beer.getName());
         HttpHeaders corsHeader = setCors();
-        for (Bar bar : listBars) {
-            barService.deleteBeerInBar(beer, bar);
+
+        boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
+        HttpStatus retStatus;
+
+        if(cookieOk) {
+            retStatus = HttpStatus.OK;
+            for (Bar bar : listBars) {
+                barService.deleteBeerInBar(beer, bar);
+            }
+            if (!beerService.delete(beer))
+                retStatus = HttpStatus.NOT_FOUND;
         }
-        if (beerService.delete(beer))
-            return new ResponseEntity<>(beer, corsHeader, HttpStatus.OK);
         else
-            return new ResponseEntity<>(beer, corsHeader, HttpStatus.NOT_FOUND);
+        {
+            retStatus = HttpStatus.UNAUTHORIZED;
+        }
+        return new ResponseEntity<>(beer, corsHeader, retStatus);
     }
 
     @RequestMapping(
@@ -144,20 +185,30 @@ public class BarCtrl extends ACtrl{
             method = RequestMethod.POST,
             consumes = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody ResponseEntity<Bar> addBeerToBar(@RequestBody Beer beer,
-                                                   @PathVariable("barname") String barname)
+                                                   @PathVariable("barname") String barname,
+                                                   @RequestHeader HttpHeaders reqHeaders)
     {
         barname = barname.replace("+", " ");
-
         HttpHeaders corsHeader = setCors();
 
-        Bar bar = barService.addBeerToBar(barname, beer, beerService);
+        boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
+        HttpStatus retStatus;
+        Bar bar;
+        if(cookieOk) {
 
-        HttpStatus status = HttpStatus.OK;
+            bar = barService.addBeerToBar(barname, beer, beerService);
 
-        if(bar == null)
-            status = HttpStatus.NOT_FOUND;
+            retStatus = HttpStatus.OK;
 
-        return new ResponseEntity<>(bar, corsHeader, status);
+            if (bar == null)
+                retStatus = HttpStatus.NOT_FOUND;
+        }
+        else
+        {
+            retStatus = HttpStatus.UNAUTHORIZED;
+            bar = null;
+        }
+        return new ResponseEntity<>(bar, corsHeader, retStatus);
     }
 
     @RequestMapping(
@@ -176,6 +227,10 @@ public class BarCtrl extends ACtrl{
      * @return true if the token is ok
      */
     private boolean checkCookie(List<String> cookies) {
+
+        if(!ActivateCookie)
+            return true;
+
         if(cookies == null || cookies.size() == 0)
             return false;
 
