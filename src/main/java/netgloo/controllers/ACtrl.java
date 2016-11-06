@@ -22,7 +22,7 @@ public class ACtrl
     protected HttpHeaders setCors()
     {
         HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.put("Access-Control-Allow-Origin", Arrays.asList("https://davanture.fr:3000"));
+        responseHeaders.put("Access-Control-Allow-Origin", Arrays.asList("http://davanture.fr:3000"));
         responseHeaders.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
         return responseHeaders;
     }
