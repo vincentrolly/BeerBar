@@ -31,16 +31,30 @@ public class BarService {
     @Autowired
     IBeerDao IBeerDao;
 
+    /**
+     * Get all the bars in the database
+     * @return listbars
+     */
     public Iterable<Bar> all()
     {
         return IBarDao.findAll();
     }
 
+    /**
+     * Get bar from it's id
+     * @param id : id for the bar
+     * @return bar found
+     */
     public Bar getById(long id)
     {
         return IBarDao.findOne(id);
     }
 
+    /**
+     * Update bar
+     * @param bar : bar to update
+     * @return bar updated
+     */
     public Bar Update(Bar bar)
     {
         if(!Exist(bar.getBarId()))
@@ -48,16 +62,11 @@ public class BarService {
         return IBarDao.save(bar);
     }
 
-    public List<Bar> getAll()
-    {
-        List<Bar> bars = new ArrayList<>();
-        for(Bar b : IBarDao.findAll())
-        {
-            bars.add(b);
-        }
-        return bars;
-    }
-
+    /**
+     * find a bar with it's name
+     * @param name : name of the bar to search
+     * @return bar found
+     */
     public Bar getByName(String name)
     {
         for(Bar b : IBarDao.findAll())
@@ -69,6 +78,13 @@ public class BarService {
         return null;
     }
 
+    /**
+     * add a beer into a bar
+     * @param nameBar : bar to update beer
+     * @param beer : beer to add into the bar
+     * @param beerService
+     * @return Bar updated with his new beer
+     */
     public Bar addBeerToBar(String nameBar,
                             Beer beer, BeerService beerService)
     {
@@ -111,6 +127,11 @@ public class BarService {
         return bar;
     }
 
+    /**
+     * Delete a bar
+     * @param bar : bar to erase
+     * @return bar deleted or not
+     */
     public boolean delete(Bar bar)
     {
         boolean ret = false;
@@ -120,16 +141,31 @@ public class BarService {
         return ret;
     }
 
+    /**
+     * Search is a bar with it's id existed
+     * @param id : id of the bar
+     * @return bar exist or not
+     */
     public boolean Exist(long id)
     {
         return getById(id) != null;
     }
 
+    /**
+     * Search if a bar exist from it's name
+     * @param name : name of the bar
+     * @return bar exist or not
+     */
     public boolean nameExist(String name)
     {
         return getByName(name) != null;
     }
 
+    /**
+     * Delete a bar with it's id
+     * @param id: id of the bar
+     * @return bar deleted or not
+     */
     public boolean delete(long id)
     {
         boolean ret = false;
@@ -141,6 +177,12 @@ public class BarService {
         return ret;
     }
 
+    /**
+     * Delete a beer into a bar
+     * @param beerToRemove : beer to remove
+     * @param bar : bar in which to remove beer
+     * @return
+     */
     public boolean deleteBeerInBar(Beer beerToRemove, Bar bar)
     {
         boolean bRet = false;
@@ -159,6 +201,11 @@ public class BarService {
         return bRet;
     }
 
+    /**
+     * Delete a bar from it's name
+     * @param name : name of the bar
+     * @return
+     */
     public boolean delete(String name)
     {
         boolean ret = false;
@@ -176,6 +223,10 @@ public class BarService {
         return ret;
     }
 
+    /**
+     * Delete all the bars
+     * @return
+     */
     public String DeleteAll()
     {
         for(Bar bar : IBarDao.findAll())
@@ -185,6 +236,11 @@ public class BarService {
         return "Delete all ok";
     }
 
+    /**
+     * Create a bar
+     * @param bar : barto create
+     * @return bar created
+     */
     public Bar create(Bar bar)
     {
         boolean res = nameExist(bar.getName());
@@ -197,13 +253,14 @@ public class BarService {
         if(barNew != null)
             return IBarDao.save(barNew);
         else
-            return bar;
+            return IBarDao.save(bar);
     }
 
     /**
-     * Creer un bar a partir des infos provenant de l'API places
+     * Create a bar with infos from API places
      *
-     * @param nameBar : nom du bar a chercher
+     * @param nameBar : name of the bar
+     * @param CityBar : City for the bar
      * @return
      */
     private Bar getBarFromGooglePlaces(String nameBar, String CityBar)
@@ -247,6 +304,11 @@ public class BarService {
         return bar;
     }
 
+    /**
+     * Get details for a bar with api places
+     * @param respdet : jsonobject with reference of the bar
+     * @return bar with it's field filled with details
+     */
     private Bar getBarFromJsonDetails(JSONObject respdet)
     {
         try {
@@ -262,11 +324,9 @@ public class BarService {
                 return null;
             }
             JSONObject first = (JSONObject) (address_components.get(0));
-//            System.out.println("\t" + first.getString("long_name"));
             String address = first.getString("long_name");
 
             first = (JSONObject) (address_components.get(1));
-//            System.out.println("\t" + first.getString("long_name"));
             address += ", " + first.getString("long_name");
             bar.setAddress(address);
 
@@ -291,6 +351,11 @@ public class BarService {
         }
     }
 
+    /**
+     * Set Longitude/Latitude for the bar
+     * @param bar : bar to be updated
+     * @param respGeometry data with geolocation long/lat
+     */
     private void setBarCoordinates(Bar bar, JSONObject respGeometry)
     {
         JSONObject location = respGeometry.getJSONObject("location");
