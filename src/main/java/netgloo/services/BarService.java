@@ -6,6 +6,7 @@ import netgloo.models.Bar;
 import netgloo.models.Beer;
 import netgloo.models.IBarDao;
 import netgloo.models.IBeerDao;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -263,16 +264,34 @@ public class BarService {
     {
         try {
             Bar bar = new Bar();
-            String formatted_address = respdet.getString("formatted_address");
-            String[] splitted_address = formatted_address.split(", ");
+            JSONArray address_components = respdet.getJSONArray("address_components");
+            if (address_components == null) {
+                System.out.println("error parsing array");
+                return null;
+            }
 
-            bar.setAddress(splitted_address[0]);
-            bar.setPostalCode(splitted_address[1]);
-            bar.setCity(splitted_address[2]);
+            if (address_components.length() == 0) {
+                System.out.println("no result");
+                return null;
+            }
+            JSONObject first = (JSONObject) (address_components.get(0));
+//            System.out.println("\t" + first.getString("long_name"));
+            String address = first.getString("long_name");
+
+            first = (JSONObject) (address_components.get(1));
+//            System.out.println("\t" + first.getString("long_name"));
+            address += ", " + first.getString("long_name");
+            bar.setAddress(address);
+
+            first = (JSONObject) (address_components.get(2));
+            bar.setCity(first.getString("long_name"));
+
+            first = (JSONObject) (address_components.get(4));
+            bar.setPostalCode(first.getString("long_name"));
+
             bar.setDescription("");
             bar.setName(respdet.getString("name"));
-
-            // TODO : check if reference ok
+            
             setBarCoordinates(bar, respdet.getJSONObject("geometry"));
 
             return bar;
