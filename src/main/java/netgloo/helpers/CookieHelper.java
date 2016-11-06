@@ -25,7 +25,6 @@ public class CookieHelper {
         return ret;
     }
 
-
     /**
      * Creates a cookie
      * @param key the cookie's name
@@ -55,20 +54,9 @@ public class CookieHelper {
         Cookie cookieToken = setCookie("token", token, 1),
                 cookieId = setCookie("id", String.valueOf(userId), 1);
 
-        // set date for expires
-//        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-//        Date date = new Date();
-//        long msDate = date.getTime();
-//        date.setTime( msDate + cookieToken.getMaxAge() * 1000 );
-
-
         String tokenString = cookieToken.getName() + "=" + cookieToken.getValue() + "; Path=" + cookieToken.getPath() + "; Max-Age=" + cookieToken.getMaxAge(),
                 idString = cookieId.getName() + "=" + cookieId.getValue() + "; Path=" + cookieId.getPath() + "; Max-Age=" + cookieId.getMaxAge();
-//        String cookieString = cookieToken.getName() + "=" + cookieToken.getValue() + "; Domain=" + cookieToken.getDomain() + "; Path=" + cookieToken.getPath() + "; Max-Age=" + cookieToken.getMaxAge();
-//        String cookieString = cookieToken.getName() + "=" + cookieToken.getValue() + "; Path=localhost; Expires=3600";// + sdate;
 
         headers.put("Set-Cookie", Arrays.asList(tokenString, idString));
-//        headers.put("Set-Cookie", Arrays.asList(tokenString));
-//        headers.put("Set-Cookie", Arrays.asList(idString));
     }
 }
