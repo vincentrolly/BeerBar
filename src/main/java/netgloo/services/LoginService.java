@@ -14,6 +14,13 @@ public class LoginService {
     @Autowired
     IUserDao iUserDao;
 
+    public Iterable<User> all()
+    {
+        Iterable<User> listUsers = iUserDao.findAll();
+
+        return listUsers;
+    }
+
     public User getByName(String name)
     {
         Iterable<User> list = iUserDao.findAll();
@@ -24,6 +31,12 @@ public class LoginService {
             }
         }
         return null;
+    }
+
+    public User create(User user)
+    {
+        User newUser = iUserDao.save(user);
+        return newUser;
     }
 
     public boolean comparePassword(User user, String password)

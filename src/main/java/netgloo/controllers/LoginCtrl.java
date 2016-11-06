@@ -37,12 +37,55 @@ public class LoginCtrl extends ACtrl
 
     @RequestMapping(
             value = "",
+            method = RequestMethod.GET)
+    public ResponseEntity<Iterable<User>> GetAll(@RequestHeader HttpHeaders reqHeaders) {
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.put("Access-Control-Allow-Origin", Arrays.asList("http://localhost:3000"));
+        headers.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
+
+        //  TODO : remettre le check cookie
+//        boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
+        boolean cookieOk = true;
+        Iterable<User> retList;
+        HttpStatus retStatus;
+        if(cookieOk)
+        {
+            retList = LoginService.all();
+            retStatus = HttpStatus.CREATED;
+        }
+        else
+        {
+            retList = null;
+            retStatus = HttpStatus.UNAUTHORIZED;
+        }
+
+        return new ResponseEntity<>(retList, headers, retStatus);
+    }
+
+    @RequestMapping(
+            value = "",
             method = RequestMethod.OPTIONS)
     @ResponseBody
     public ResponseEntity ReplyOptions() {
 
         HttpHeaders corsHeader = setCors();
         return new ResponseEntity(null, corsHeader, HttpStatus.OK);
+    }
+
+    @RequestMapping(
+            value = "",
+            method = RequestMethod.PUT)
+    @ResponseBody
+    public ResponseEntity Create(@RequestBody User user) {
+
+        HttpHeaders corsHeader = setCors();
+        LoginRequestParams params = new LoginRequestParams();
+        params.setPassword(user.getPassword());
+        params.setUsername(user.getUsername());
+        String token = generateToken(params);
+        storeToken(user, token);
+        return new ResponseEntity(LoginService.create(user), corsHeader, HttpStatus.OK);
     }
 
     @RequestMapping(
