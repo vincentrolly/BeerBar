@@ -33,9 +33,7 @@ public class BarService {
 
     public Iterable<Bar> all()
     {
-        Iterable<Bar> listBars = IBarDao.findAll();
-
-        return listBars;
+        return IBarDao.findAll();
     }
 
     public Bar getById(long id)
@@ -74,28 +72,26 @@ public class BarService {
     public Bar addBeerToBar(String nameBar,
                             Beer beer, BeerService beerService)
     {
-        //BeerService beerService = new BeerService();
-
-        // on recupere la biere par son nom depuis la base de donnees
+        // Get beer from his name from DataBase
         Beer beerExist = beerService.getByName(beer.getName());
 
         boolean isInList = false;
 
-        // on verifie que la biere existe
+        // Check if the beer exist
         if(beerExist == null)
         {
-            // elle existe pas, on la cree
+            // create beer
             beerService.create(beer);
         }
 
-        // Recuperer le bar a partir de son nom
+        // Get Bar from his name
         Bar bar = this.getByName(nameBar);
 
         if(bar == null)
             return null;
         else
         {
-            // bartrouve : je recup sa liste de biere
+            // Get listbeer from this bar
             Set<Beer> listBeer = bar.getListBeer();
             for (Beer oneBeer : listBeer)
             {
@@ -106,8 +102,9 @@ public class BarService {
             }
             if(!isInList)
             {
-                // Si biere non presente dans sa liste, on la rajoute
+                // beer not on the listbeer : add it !
                 bar.AddBeer(beer);
+                // Update the bar with it's new listbeer
                 Update(bar);
             }
         }
@@ -148,15 +145,16 @@ public class BarService {
     {
         boolean bRet = false;
 
-//        Set<Beer> listBeers = bar.getListBeer();
-//        for (Beer beer : listBeers)
-//        {
-//            if(beer.getName().equals(beerToRemove.getName()))
-//            {
-//                listBeers.remove(beer);
-//                bar.setListBeer(listBeers);
-//            }
-//        }
+        Set<Beer> listBeers = bar.getListBeer();
+        for (Beer beer : listBeers)
+        {
+            if(beer.getName().equals(beerToRemove.getName()))
+            {
+                listBeers.remove(beer);
+                bar.setListBeer(listBeers);
+                bRet = true;
+            }
+        }
 
         return bRet;
     }
@@ -196,7 +194,10 @@ public class BarService {
         }
 
         Bar barNew = getBarFromGooglePlaces(bar.getName(), bar.getCity());
-        return IBarDao.save(barNew);
+        if(barNew != null)
+            return IBarDao.save(barNew);
+        else
+            return bar;
     }
 
     /**
