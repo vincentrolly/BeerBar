@@ -39,10 +39,7 @@ public class LoginCtrl extends ACtrl
             value = "",
             method = RequestMethod.GET)
     public ResponseEntity<Iterable<User>> GetAll(@RequestHeader HttpHeaders reqHeaders) {
-        HttpHeaders headers = new HttpHeaders();
-
-        headers.put("Access-Control-Allow-Origin", Arrays.asList("http://localhost:3000"));
-        headers.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
+        HttpHeaders headers = setCors();
 
         //  TODO : remettre le check cookie
 //        boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
@@ -113,9 +110,7 @@ public class LoginCtrl extends ACtrl
             this.storeToken(user, token);
             CookieHelper.addCookie(headers, token, user.getUserId());
 
-            headers.put("Access-Control-Allow-Origin", Arrays.asList("http://localhost:3000"));
-            headers.put("Access-Control-Allow-Credentials", Arrays.asList("true"));
-
+            headers = setCors();
             retStatus = HttpStatus.OK;
         }
         else
