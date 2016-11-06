@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 public class LoginService {
 
     @Autowired
-    private IUserDao iUserDao;
+    IUserDao iUserDao;
 
     public User getByName(String name)
     {
