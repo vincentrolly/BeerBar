@@ -40,9 +40,6 @@ public class BarCtrl extends ACtrl{
     @Autowired
     private BeerService beerService;
 
-
-//    private BeerService beerService = new BeerService();
-
     @RequestMapping(
             value = "",
             method = RequestMethod.GET)
@@ -69,98 +66,6 @@ public class BarCtrl extends ACtrl{
         }
 
         return new ResponseEntity<>(retList, headers, retStatus);
-    }
-
-    /**
-     * Checks if the request's cookies contain the token, and verify this token with db
-     * @param cookies
-     * @return true if the token is ok
-     */
-    private boolean checkCookie(List<String> cookies) {
-        if(cookies == null || cookies.size() == 0)
-            return false;
-
-        String[] cookiesStr = cookies.get(0).split(";");
-        ArrayList<HttpCookie> coo = new ArrayList<>();
-
-        for(String cooStr: cookiesStr) {
-            List<HttpCookie> ll = HttpCookie.parse(cooStr.trim());
-
-            if(ll.size() == 1)
-            {
-                coo.add(ll.get(0));
-            }
-            else
-            {
-                for(HttpCookie cook: ll)
-                    coo.add(cook);
-            }
-        }
-
-        int userId = 0,
-            cooSize = coo == null
-                    ? 0
-                    : coo.size();
-        String token = null;
-
-        if(cooSize == 0)
-            return false;
-
-        for(int i = 0; i < cooSize; ++i)
-        {
-            String name = coo.get(i).getName();
-
-            if(name.equals("token") )
-            {
-                token = coo.get(i).getValue();
-            }
-            else if(name.equals("id") )
-            {
-                userId = stringToInt( coo.get(i).getValue() );
-            }
-        }
-
-        if(userId == 0 || token == null)
-            return false;
-
-        return this.checkToken(userId, token);
-    }
-
-    /**
-     * Converts a string to int
-     * @param value
-     * @return the int obtained, null if format exception
-     */
-    private static int stringToInt(String value) {
-        try
-        {
-            return Integer.parseInt(value);
-        }
-        catch (NumberFormatException nfe)
-        {
-            return 0;
-        }
-    }
-
-    /**
-     * Check if token value is the same as db data for a selected user
-     * @param userId the id of the user we want to match the token
-     * @param tokenValue
-     * @return true if the token matches
-     */
-    private boolean checkToken(int userId, String tokenValue) {
-        // on recupere l'utilisateur par son id
-        User user = loginService.getById(userId);
-
-        // on verifie que l'utilisateur existe
-        if (user == null)
-            return false;
-
-        // on verifie que le token corresponde
-        if (!tokenValue.equals(user.getToken()))
-            return false;
-
-        return true;
     }
 
     @RequestMapping(
@@ -201,7 +106,6 @@ public class BarCtrl extends ACtrl{
             bar.setName(bar.getName().substring(0, bar.getName().length() - 1));
 
         Bar response = barService.create(bar);
-
         return new ResponseEntity<>(response, corsHeader,  HttpStatus.CREATED);
     }
 
@@ -264,5 +168,97 @@ public class BarCtrl extends ACtrl{
 
         HttpHeaders corsHeader = setCors();
         return new ResponseEntity(null, corsHeader, HttpStatus.OK);
+    }
+
+    /**
+     * Checks if the request's cookies contain the token, and verify this token with db
+     * @param cookies
+     * @return true if the token is ok
+     */
+    private boolean checkCookie(List<String> cookies) {
+        if(cookies == null || cookies.size() == 0)
+            return false;
+
+        String[] cookiesStr = cookies.get(0).split(";");
+        ArrayList<HttpCookie> coo = new ArrayList<>();
+
+        for(String cooStr: cookiesStr) {
+            List<HttpCookie> ll = HttpCookie.parse(cooStr.trim());
+
+            if(ll.size() == 1)
+            {
+                coo.add(ll.get(0));
+            }
+            else
+            {
+                for(HttpCookie cook: ll)
+                    coo.add(cook);
+            }
+        }
+
+        int userId = 0,
+                cooSize = coo == null
+                        ? 0
+                        : coo.size();
+        String token = null;
+
+        if(cooSize == 0)
+            return false;
+
+        for(int i = 0; i < cooSize; ++i)
+        {
+            String name = coo.get(i).getName();
+
+            if(name.equals("token") )
+            {
+                token = coo.get(i).getValue();
+            }
+            else if(name.equals("id") )
+            {
+                userId = stringToInt( coo.get(i).getValue() );
+            }
+        }
+
+        if(userId == 0 || token == null)
+            return false;
+
+        return checkToken(userId, token);
+    }
+
+    /**
+     * Converts a string to int
+     * @param value
+     * @return the int obtained, null if format exception
+     */
+    private static int stringToInt(String value) {
+        try
+        {
+            return Integer.parseInt(value);
+        }
+        catch (NumberFormatException nfe)
+        {
+            return 0;
+        }
+    }
+
+    /**
+     * Check if token value is the same as db data for a selected user
+     * @param userId the id of the user we want to match the token
+     * @param tokenValue
+     * @return true if the token matches
+     */
+    private boolean checkToken(int userId, String tokenValue) {
+        // Get the user with his id
+        User user = loginService.getById(userId);
+
+        // Check if the user exist
+        if (user == null)
+            return false;
+
+        // Check if his token correspond with the token received
+        if (!tokenValue.equals(user.getToken()))
+            return false;
+
+        return true;
     }
 }
