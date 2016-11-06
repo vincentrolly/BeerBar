@@ -48,7 +48,7 @@ public class BarCtrl extends ACtrl{
     public ResponseEntity<Iterable<Bar>> GetAll(@RequestHeader HttpHeaders reqHeaders) {
         HttpHeaders headers = setCors();
 
-        boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
+        boolean cookieOk = logCheckCookie(reqHeaders.get("cookie"));
         Iterable<Bar> retList;
         HttpStatus retStatus;
         if(cookieOk)
@@ -84,7 +84,7 @@ public class BarCtrl extends ACtrl{
                                          @RequestHeader HttpHeaders reqHeaders) {
         final HttpHeaders corsHeader = setCors();
 
-        boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
+        boolean cookieOk = logCheckCookie(reqHeaders.get("cookie"));
         HttpStatus retStatus;
         Bar barUpdate;
         if(cookieOk) {
@@ -110,7 +110,7 @@ public class BarCtrl extends ACtrl{
                                       @RequestHeader HttpHeaders reqHeaders) {
         HttpHeaders corsHeader = setCors();
 
-        boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
+        boolean cookieOk = logCheckCookie(reqHeaders.get("cookie"));
         HttpStatus retStatus;
         Bar response;
         if(cookieOk) {
@@ -137,7 +137,7 @@ public class BarCtrl extends ACtrl{
                                          @RequestHeader HttpHeaders reqHeaders) {
         HttpHeaders corsHeader = setCors();
 
-        boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
+        boolean cookieOk = logCheckCookie(reqHeaders.get("cookie"));
         HttpStatus retStatus;
 
         if(cookieOk) {
@@ -162,7 +162,7 @@ public class BarCtrl extends ACtrl{
         List<Bar> listBars = beerService.getBarsWithThisBeer(beer.getName());
         HttpHeaders corsHeader = setCors();
 
-        boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
+        boolean cookieOk = logCheckCookie(reqHeaders.get("cookie"));
         HttpStatus retStatus;
 
         if(cookieOk) {
@@ -191,7 +191,7 @@ public class BarCtrl extends ACtrl{
         barname = barname.replace("+", " ");
         HttpHeaders corsHeader = setCors();
 
-        boolean cookieOk = checkCookie(reqHeaders.get("cookie"));
+        boolean cookieOk = logCheckCookie(reqHeaders.get("cookie"));
         HttpStatus retStatus;
         Bar bar;
         if(cookieOk) {
@@ -219,6 +219,19 @@ public class BarCtrl extends ACtrl{
 
         HttpHeaders corsHeader = setCors();
         return new ResponseEntity(null, corsHeader, HttpStatus.OK);
+    }
+
+    private boolean logCheckCookie(List<String> cookies) {
+        boolean ret = checkCookie(cookies);
+
+        if(ret == false)
+        {
+            System.out.println("=======================");
+            System.out.println("\tBAD COOKIE");
+            System.out.println("=======================");
+        }
+
+        return ret;
     }
 
     /**
